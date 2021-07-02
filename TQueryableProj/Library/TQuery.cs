@@ -1,18 +1,30 @@
 ﻿using System;
+using Dapper;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using TQueryableProj;
 
 namespace TQueryable.Library
 {
+
     public class TQuery<T> : TQueryable<T>, TQueryableOrdered<T>, TQueryableGrouped<T>, TQueryableFiltered<T>, TQueryableJoined<T>, TQueryableBoolean<T>, TQueryableUpdated<T>, TQueryableSelected<T>, TQueryableSingle<T>
     {
+        private readonly IConfiguration _configuration;
+
+        public static IConfigurationRoot Configuration { get; private set; }
         public IQueryable<T> Empty { get; set; }
         public string SqlString { get; set; }
 
         public int ExecuteCommand()
         {
-            return 0;
+            using (var connection = new SqlConnection("Data Source=hgws27.win.hostgator.com; Database=quickpps_tquery; User ID=quickpps_satmer;Password=If3t9q2*; MultipleActiveResultSets=True"))
+            {
+                return connection.Execute(SqlString);
+            }
         }
 
         public List<T> ExecuteQuery()
@@ -24,10 +36,13 @@ namespace TQueryable.Library
         {
             return true;
         }
-
         int TQueryable<T>.ExecuteCommand()
         {
-            return 0;
+            string conString = ConfigurationExtensions.GetConnectionString(Startup.Configuration, "DefaultConnection");
+            using (var connection = new SqlConnection(conString))
+            {
+                return connection.Execute(SqlString);
+            }
         }
     }
 
@@ -442,7 +457,13 @@ namespace TQueryable.Library
 
         public static TQueryable<T> Create<T>(this TQueryable<T> tQuery)
         {
-            return new TQuery<T>();
+            if (tQuery.Empty == null) { tQuery.Empty = Enumerable.Empty<T>().AsQueryable(); }
+            var table = tQuery.Empty.GetType().GenericTypeArguments[0];
+            var props = table.GetProperties().ToList();
+            List<string> fields = new List<string>();
+            foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
+            tQuery.SqlString = "CREATE TABLE " + table.Name+"("+Environment.NewLine + fields.Join(Environment.NewLine + ",") + ");";
+            return tQuery;
         }
 
         public static TQueryable<T> Insert<T>(this TQueryable<T> tQuery, List<T> records)

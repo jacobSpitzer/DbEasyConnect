@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=hgws27.win.hostgator.com; Database=quickpps_tquery; User ID=quickpps_satmer;Password=If3t9q2*; MultipleActiveResultSets=True"
+  }
+}
