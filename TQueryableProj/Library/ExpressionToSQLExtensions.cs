@@ -2,44 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 
-namespace Bar
+namespace TQueryable.Library
 {
     public static class ExpressionToSQLExtensions
     {
-        //private static readonly MethodInfo _toSqlStringMethod;
-        //private static readonly MethodInfo _toSqlSelectStringMethod;
-        //private static readonly MethodInfo _toSqlInsertStringMethod;
-        //private static readonly MethodInfo _toSqlUpdateStringMethod;
-        //private static readonly MethodInfo _toSqlDeleteStringMethod;
-
-        //static ExpressionToSQLExtensions()
-        //{
-        //    Type extensionType = typeof(ExpressionToSQLExtensions);
-        //    _toSqlStringMethod = extensionType.GetMethod(nameof(ExpressionToSQLExtensions.ToSqlString), BindingFlags.Static | BindingFlags.Public);
-        //    _toSqlSelectStringMethod = extensionType.GetMethod(nameof(ExpressionToSQLExtensions.ToSqlSelectString), BindingFlags.Static | BindingFlags.Public);
-        //    _toSqlInsertStringMethod = extensionType.GetMethod(nameof(ExpressionToSQLExtensions.ToSqlInsertString), BindingFlags.Static | BindingFlags.Public);
-        //    _toSqlUpdateStringMethod = extensionType.GetMethod(nameof(ExpressionToSQLExtensions.ToSqlUpdateString), BindingFlags.Static | BindingFlags.Public);
-        //    _toSqlDeleteStringMethod = extensionType.GetMethod(nameof(ExpressionToSQLExtensions.ToSqlDeleteString), BindingFlags.Static | BindingFlags.Public);
-        //}
 
         public static bool CanConvertToSqlDbType(this Type type) => type.ToSqlDbTypeInternal().HasValue;
-
-        //public static string GetTableName(this IQueryable query, Type entity)
-        //{
-        //    return entity.Name;
-        //}
-
-        //public static SqlDbType ToSqlDbType(this Type type) =>
-        //    type.ToSqlDbTypeInternal() ?? throw new InvalidCastException($"Unable to cast from '{type}' to '{typeof(DbType)}'.");
-
-        //public static string ToSqlString<T>(this IQueryable<T> queryable) => new _ExpressionToSQL(queryable);
-        //public static string ToSqlSelectString<T>(this IQueryable<T> queryable) => new _ExpressionToSQL(queryable);
-        //public static string ToSqlInsertString<T>(this IQueryable<T> queryable) => new _ExpressionToSQL(queryable);
-        //public static string ToSqlUpdateString<T>(this IQueryable<T> queryable) => new _ExpressionToSQL(queryable);
-        //public static string ToSqlDeleteString<T>(this IQueryable<T> queryable) => new _ExpressionToSQL(queryable);
 
         internal static string Join(this IEnumerable<string> values, string separator) => string.Join(separator, values);
 

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bar
+namespace TQueryable.Library
 {
     public static class Evaluator
     {
