@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dapper.TQuery.Development
+namespace Dapper.TQuery.Library
 {
     internal class TQuery<T> : TQueryable<T>, TQueryableSelect<T>, TQueryableOrder<T>, TQueryableFilter<T>, TQueryableGroup<T>, TQueryableJoin<T>, TQueryableBool<T>, TQueryableSingle<T>
     {

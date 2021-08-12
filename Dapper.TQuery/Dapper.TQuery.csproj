@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>0.1.1</Version>
+    <Authors>Jacob Spitzer</Authors>
+    <Company>QuickApps</Company>
+    <Product>Dapper.TQuery</Product>
+    <Description>Use Dapper 'Queryable' like 'Linq'.
+* Avoid complex entity-framework configuration, create/delete all tables with writing table classes only.
+* Fast performance with Dapper, and restricted sql commands like Linq to avoid incorrect sql syntax.
+* The generated SQL commands is readeble and editable. Up to the Developer.</Description>
+    <Copyright>Copyright 2021 QuickApps.ca</Copyright>
+    <PackageProjectUrl>https://www.quickapps.ca/projects/dapper-tquery-library</PackageProjectUrl>
+    <PackageIcon>QuickAppsIco.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageTags>dapper queryable quickapps</PackageTags>
+    <PackageReleaseNotes>The project is still in beta mode.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.90" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\Downloads\QuickAppsIco.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

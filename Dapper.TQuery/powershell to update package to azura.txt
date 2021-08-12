@@ -1,0 +1,10 @@
+C:\Users\User\source\repos\DapperQueryable\Dapper.TQuery\bin\Debug\nuget.exe push -Source "Dapper-TQuery" -ApiKey QuickApps Dapper.TQuery.0.1.1.nupkg
+
+Library description:
+Use Dapper 'Queryable' like 'Linq'.
+* Avoid complex entity-framework configuration, create/delete all tables with writing table classes only.
+* Fast performance with Dapper, and restricted sql commands like Linq to avoid incorrect sql syntax.
+* The generated SQL commands is readeble and editable. Up to the Developer.
+
+Project URL:
+https://www.quickapps.ca/projects/dapper-tquery-library

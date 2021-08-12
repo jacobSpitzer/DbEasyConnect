@@ -1,8 +1,8 @@
-﻿using Dapper.TQuery.Development;
+﻿using Dapper.TQuery.Library;
 using System;
 using System.Data.SqlClient;
 
-namespace TQuery
+namespace Dapper.TQuery.Test
 {
     class Program
     {
@@ -49,9 +49,4 @@ namespace TQuery
         }
 
     }
-
 }
-
-
-
-

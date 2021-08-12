@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Dapper.TQuery.Development
+namespace Dapper.TQuery.Library
 {
     public static class Evaluator
     {
