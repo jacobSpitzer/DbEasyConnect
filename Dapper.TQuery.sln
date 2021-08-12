@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.TQuery.Development", "TQueryableProj\Dapper.TQuery.Development.csproj", "{3378C61F-0429-4B86-B91E-4F18CBFFC9F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.TQuery.Development", "Dapper.TQuery.Development\Dapper.TQuery.Development.csproj", "{3378C61F-0429-4B86-B91E-4F18CBFFC9F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.TQuery", "Dapper.TQuery\Dapper.TQuery.csproj", "{83EBCF31-D03A-4A0A-BEDD-01C8D1298CC6}"
 EndProject
