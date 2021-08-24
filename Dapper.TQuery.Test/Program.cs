@@ -1,6 +1,9 @@
-﻿using Dapper.TQuery.Library;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
+using Dapper.TQuery.Library;
+using MyDapper.Tables;
 
 namespace Dapper.TQuery.Test
 {
@@ -8,12 +11,11 @@ namespace Dapper.TQuery.Test
     {
         static void Main(string[] args)
         {
-
-
+            //var list = new List<ForumUser>();
+            //IQueryable<ForumUser> query = list.AsQueryable();
             //Console.WriteLine("");
             var con = new SqlConnection("Server=hgws27.win.hostgator.com; Database=quickpps_test; User ID=quickpps_test;Password=Hj4d6~4q; Trusted_Connection=False; MultipleActiveResultSets=True");
-            var i = con.GetAllDbTablesType();
-            //var i = con.TQuery<ForumUser>().DropTable().Execute();
+            //var i = con.CreateAllTables();
             //i = con.TQuery<ForumUser>().CreateTableIfNotExits().Execute();
             //var tables = con.GetAllTablesType();
             //var sql = con.CreateAllTables().Execute();

@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.90" />
+    <PackageReference Include="Dapper.Bulk" Version="1.5.0" />
+    <PackageReference Include="RandomGen" Version="1.1.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>

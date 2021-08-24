@@ -152,7 +152,8 @@ namespace Dapper.TQuery.Library
 
                 Visit(binaryExpression.Right);
                 _parts.Add(")");
-            } else if (CurrentMethodCall == nameof(ExpressionToSQL.PSelect))
+            }
+            else if (CurrentMethodCall == nameof(ExpressionToSQL.PSelect))
             {
                 _parts.Add("(");
                 Visit(binaryExpression.Left);
@@ -198,7 +199,8 @@ namespace Dapper.TQuery.Library
                     _parts.Add("AS [" + _members[_member] + "]");
                     _member++;
                     _select.Add(_parts.Join(" "));
-                } else { _select[_select.Count() - 1] = _select.Last().Replace(" AS",_parts[0] + " AS"); }
+                }
+                else { _select[_select.Count() - 1] = _select.Last().Replace(" AS", _parts[0] + " AS"); }
                 _parts.Clear();
             }
             else if (CurrentMethodCall == nameof(ExpressionToSQL.PUpdate))
@@ -252,7 +254,7 @@ namespace Dapper.TQuery.Library
                 {
                     _update.Add(_parts.Join(" "));
                 }
-                else { _update[_update.Count() - 1] = _update.Last()+ _parts[0]; }
+                else { _update[_update.Count() - 1] = _update.Last() + _parts[0]; }
                 _parts.Clear();
             }
             return binaryExpression;
@@ -266,7 +268,7 @@ namespace Dapper.TQuery.Library
                 foreach (Expression arg in newExpression.Arguments)
                 {
                     Visit(arg);
-                    if (_parts.Count >0)
+                    if (_parts.Count > 0)
                     {
                         if (_parts.Last() != _members[_member])
                         {
@@ -280,7 +282,6 @@ namespace Dapper.TQuery.Library
             }
             return newExpression;
         }
-
 
         protected override Expression VisitConstant(ConstantExpression constantExpression)
         {
@@ -304,8 +305,8 @@ namespace Dapper.TQuery.Library
             if (CurrentMethodCall == nameof(ExpressionToSQL.PSelect) || CurrentMethodCall == nameof(ExpressionToSQL.PUpdate))
                 _parts.Add(CreateParameter(constantExpression.Value).ParameterName);
             if (CurrentMethodCall == nameof(ExpressionToSQL.Bottom) && constantExpression.Value != null && (int)constantExpression.Value > 0)
-                    _last = (int)constantExpression.Value;
-                return constantExpression;
+                _last = (int)constantExpression.Value;
+            return constantExpression;
         }
 
         protected override Expression VisitMember(MemberExpression memberExpression)
@@ -389,11 +390,11 @@ namespace Dapper.TQuery.Library
                         _where.Add(_parts.Join(" "));
                         _parts.Clear();
                     }
-                    
+
                     foreach (Expression arg in methodCallExpression.Arguments)
                     {
                         MethodCallExpression expression = arg as MethodCallExpression;
-                        if (expression==null) { continue; }
+                        if (expression == null) { continue; }
                         CurrentMethodCall = expression.Method.Name;
                         if (arg.NodeType == ExpressionType.Call) Visit(arg); break;
                     }
@@ -505,7 +506,7 @@ namespace Dapper.TQuery.Library
                             break;
                         case ExpressionType.New:
                             NewExpression newExpression = lambda.Body as NewExpression;
-                            for (int i = 0;i< newExpression.Arguments.Count; i++)
+                            for (int i = 0; i < newExpression.Arguments.Count; i++)
                             {
                                 if (newExpression.Arguments[i].NodeType == ExpressionType.Parameter)
                                 {
@@ -520,7 +521,10 @@ namespace Dapper.TQuery.Library
                             }
                             break;
                     }
-                        return methodCallExpression;
+                    return methodCallExpression;
+                case nameof(ExpressionToSQL.Delete):
+                    IsDelete = true;
+                    return methodCallExpression;
                 default:
                     if (methodCallExpression.Object != null)
                     {
@@ -942,11 +946,11 @@ namespace Dapper.TQuery.Library
         }
         private readonly List<Expression> expressions = new List<Expression>();
 
-        public static Expression PUpdate<T>(Expression<Func<T, T>> selector )
+        internal static Expression PUpdate<T>(Expression<Func<T, T>> selector)
         {
             var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.PUpdate));
             MethodInfo methodInfoGeneric = methodInfo.MakeGenericMethod(typeof(T));
-            MethodCallExpression methodCallExpression = Expression.Call(methodInfoGeneric,selector);
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfoGeneric, selector);
             return Expression.Lambda(methodCallExpression);
         }
 
@@ -962,7 +966,14 @@ namespace Dapper.TQuery.Library
         {
             var expression = Expression.Constant(predicate);
             var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Bottom));
-            //MethodInfo methodInfoGeneric = methodInfo.MakeGenericMethod(typeof(int));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        public static Expression Delete(int something)
+        {
+            var expression = Expression.Constant(something);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Delete));
             MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
             return Expression.Lambda(methodCallExpression);
         }

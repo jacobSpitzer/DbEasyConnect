@@ -6,23 +6,29 @@ using System.Threading.Tasks;
 
 namespace Dapper.TQuery.Development
 {
-    internal class TQuery<T> : TQueryable<T>, TQueryableSelect<T>, TQueryableOrder<T>, TQueryableFilter<T>, TQueryableGroup<T>, TQueryableJoin<T>, TQueryableBool<T>, TQueryableSingle<T>
+    internal class AutoIncrementAttribute : Attribute
     {
-        public TQuery(string ConnectionString) { this.SqlConnection = new SqlConnection(ConnectionString); }
-        public TQuery(SqlConnection sqlConnection) { this.SqlConnection = sqlConnection; }        
-        public SqlConnection SqlConnection { get; set; }
-        public IQueryable<T> EmptyQuery { get; set; }
-        public string SqlString { get; set; }
-        public IEnumerable<T> Get()
+    }
+
+    public abstract class TQuery<T>
+    {
+        internal SqlConnection SqlConnection { get; set; }
+        internal IQueryable<T> EmptyQuery { get; set; }
+        internal string SqlString { get; set; }
+        internal SqlDialect SqlDialect { get; set; }
+    }
+    public abstract class TQueryGet<T>: TQuery<T>
+    {
+        public List<T> ToList()
         {
             if (String.IsNullOrEmpty(SqlString))
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
                 SqlString = new ExpressionToSQL(EmptyQuery);
-            }  
-            return SqlConnection.Query<T>(SqlString);
+            }
+            return SqlConnection.Query<T>(SqlString).ToList();
         }
-        public Task<IEnumerable<T>> GetAsync()
+        public Task<IEnumerable<T>> ToListAsync()
         {
             if (String.IsNullOrEmpty(SqlString))
             {
@@ -31,31 +37,13 @@ namespace Dapper.TQuery.Development
             }
             return SqlConnection.QueryAsync<T>(SqlString);
         }
-    }
-
-    public class TQueryCreate
-    {
-        public TQueryCreate(string ConnectionString) { this.SqlConnection = new SqlConnection(ConnectionString); }
-        public TQueryCreate(SqlConnection sqlConnection) { this.SqlConnection = sqlConnection; }
-        public SqlConnection SqlConnection { get; set; }
-        public string SqlString { get; set; }
-        public int Execute()
+        public string ToSqlString()
         {
-            //SqlCommand sql = new SqlCommand(SqlString, SqlConnection);
-            return SqlConnection.Execute(SqlString);
-        }
-        public Task<int> ExecuteAsync()
-        {
-            return SqlConnection.ExecuteAsync(SqlString);
+            return SqlString;
         }
     }
-    public class TQueryExecute<T> : TQueryableUpdate<T>, TQueryableDelete<T>, TQueryableInsert<T>
+    public abstract class TQueryExecute<T> : TQuery<T>
     {
-        public SqlConnection SqlConnection { get; set; }
-        public TQueryExecute(string ConnectionString) { this.SqlConnection = new SqlConnection(ConnectionString); }
-        public TQueryExecute(SqlConnection sqlConnection) { this.SqlConnection = sqlConnection; }
-        public IQueryable<T> EmptyQuery { get; set; }
-        public string SqlString { get; set; }
         public int Execute()
         {
             return SqlConnection.Execute(SqlString);
@@ -64,101 +52,140 @@ namespace Dapper.TQuery.Development
         {
             return SqlConnection.ExecuteAsync(SqlString);
         }
+        public string ToSqlString()
+        {
+            return SqlString;
+        }
     }
-    public interface TQueryable<T> 
-    { 
-        IQueryable<T> EmptyQuery { get; set; } 
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableSelect<T>
+    
+    public class TQueryable<T> : TQueryGet<T>
     {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
+        internal TQueryable(string ConnectionString, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = new SqlConnection(ConnectionString);
+            this.SqlDialect = sqlDialect;
+            if (EmptyQuery == null)
+            {
+                EmptyQuery = Enumerable.Empty<T>().AsQueryable();
+            }
+        }
+        internal TQueryable(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = sqlConnection;
+            this.SqlDialect = sqlDialect;
+            if (EmptyQuery == null)
+            {
+                EmptyQuery = Enumerable.Empty<T>().AsQueryable();
+            }
+        }
     }
-    public interface TQueryableOrder<T>
+    public class TQueryableSql<T> : TQueryGet<T>
     {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableFilter<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableGroup<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableJoin<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableSingle<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableBool<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        IEnumerable<T> Get();
-        Task<IEnumerable<T>> GetAsync();
-    }
-    public interface TQueryableUpdate<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        int Execute();
-        Task<int> ExecuteAsync();
-    }
-    public interface TQueryableDelete<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        int Execute();
-        Task<int> ExecuteAsync();
-    }
-    public interface TQueryableInsert<T>
-    {
-        IQueryable<T> EmptyQuery { get; set; }
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        int Execute();
-        Task<int> ExecuteAsync();
+        internal TQueryableSql(string ConnectionString, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = new SqlConnection(ConnectionString);
+            if (EmptyQuery == null)
+            {
+                EmptyQuery = Enumerable.Empty<T>().AsQueryable();
+            }
+        }
+        internal TQueryableSql(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = sqlConnection;
+            if (EmptyQuery == null)
+            {
+                EmptyQuery = Enumerable.Empty<T>().AsQueryable();
+            }
+        }
     }
 
-    public interface TQueryableCreate
+    public class TQueryableSelect<T> : TQueryGet<T> { }
+    //public interface TQueryableOrder<out T> : TQueryable<T> { }
+    public class TQueryableFilter<T> : TQueryGet<T> { }
+    public class TQueryableGroup<T> : TQueryGet<T> { }
+    public class TQueryableJoin<T> : TQueryGet<T> { }
+    public class TQueryableJoin<T, TResult> : TQueryGet<T> { }
+    public class TQueryableSingle<T> : TQueryGet<T> { }
+    public class TQueryableUpdate<T> : TQueryExecute<T> { }
+    public class TQueryableDelete<T> : TQueryExecute<T> { }
+    public class TQueryableInsert<T> : TQueryExecute<T> { }
+    public class TQueryableCreate<T> : TQueryExecute<T> { }
+    public class TQueryableBool<T> : TQuery<T>
     {
-        string SqlString { get; set; }
-        SqlConnection SqlConnection { get; set; }
-        int Execute();
-        Task<int> ExecuteAsync();
+        public bool Execute()
+        {
+            return SqlConnection.ExecuteScalar<bool>(SqlString);
+        }
+        public Task<bool> ExecuteAsync()
+        {
+            return SqlConnection.ExecuteScalarAsync<bool>(SqlString);
+        }
+    }
+    public class TQueryableDatabase
+    {
+        internal SqlConnection SqlConnection { get; set; }
+        internal string SqlString { get; set; }
+
+        public int Execute()
+        {
+            return SqlConnection.Execute(SqlString);
+        }
+        public Task<int> ExecuteAsync()
+        {
+            return SqlConnection.ExecuteAsync(SqlString);
+        }
+
+    }
+
+    /// <summary>
+    /// SQL dialect enumeration
+    /// </summary>
+    public enum SqlDialect
+    {
+        /// <summary>
+        /// MS SQL Server
+        /// </summary>
+        MsSql,
+
+        /// <summary>
+        /// MySql
+        /// </summary>
+        MySql,
+
+        /// <summary>
+        /// SQLite
+        /// </summary>
+        SqLite,
+
+        /// <summary>
+        /// PostgreSql
+        /// </summary>
+        PostgreSql
+    }
+
+    /// <summary>
+    /// SQL Join Type enumeration
+    /// </summary>
+    public enum JoinType
+    {
+        /// <summary>
+        /// (INNER) JOIN: Returns records that have matching values in both tables
+        /// </summary>
+        InnerJoin,
+
+        /// <summary>
+        /// LEFT (OUTER) JOIN: Returns all records from the left table, and the matched records from the right table
+        /// </summary>
+        LeftJoin,
+
+        /// <summary>
+        /// RIGHT (OUTER) JOIN: Returns all records from the right table, and the matched records from the left table
+        /// </summary>
+        RightJoin,
+
+        /// <summary>
+        /// FULL (OUTER) JOIN: Returns all records when there is a match in either left or right table
+        /// </summary>
+        FullJoin
     }
 }

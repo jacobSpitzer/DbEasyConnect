@@ -49,7 +49,8 @@ namespace Dapper.TQuery.Development
         public int _member = 0;
         public string[] _members = new string[] { };
         public string _joinType;
-
+        public bool firstJoin = true;
+        public List<string> join_tables = new List<string>();
         public ExpressionToSQL(IQueryable queryable, Expression exp = null, string _join = null)
         {
             if (queryable is null)
@@ -72,7 +73,7 @@ namespace Dapper.TQuery.Development
         public string OrderBy => BuildOrderByStatement().Join(" ");
         public SqlParameter[] Parameters => _parameters.ToArray();
         public string Select => BuildSelectStatement().Join(" ");
-        public string Join => _join.Count == 0 ? null : _joinType + " " + _join.Join(" ");
+        public string Join => _join.Count == 0 ? null : _join.Join(Environment.NewLine);
         public int? Skip => _skip;
         public string TableName { get; private set; }
         public int? Take => _take;
@@ -281,7 +282,6 @@ namespace Dapper.TQuery.Development
             return newExpression;
         }
 
-
         protected override Expression VisitConstant(ConstantExpression constantExpression)
         {
             this.expressions.Add(constantExpression);
@@ -321,44 +321,21 @@ namespace Dapper.TQuery.Development
                             case nameof(Queryable.Where):
                                 _parts.Add($"[{memberExpression.Member.Name}]");
                                 break;
-                            //case nameof(Queryable.Join):
-                            //    if (_join.Count == 1)
-                            //    {
-                            //        _join.Insert(0,$"[{expression.Type.Name}] ON");
-                            //        _join.Add("=");
-                            //    }
-                            //    if (_join.Count < 4)
-                            //    {
-                            //        _join.Add($"[{expression.Type.Name}].[{memberExpression.Member.Name}]");
-                            //    } else
-                            //    {
-                            //        _select.Add($"[{expression.Type.Name}].[{memberExpression.Member.Name}]");
-                            //    }
-                            //    break;
                             case nameof(ExpressionToSQL.PSelect):
                             case nameof(ExpressionToSQL.PUpdate):
                                 _parts.Add($"[{memberExpression.Member.Name}]");
                                 break;
                             default:
-                                //_where.Add($"[{memberExpression.Member.Name}]");
                                 break;
                         }
                         return memberExpression;
 
                     case ExpressionType.Constant:
                         _parts.Add(CreateParameter(GetValue(memberExpression)).ParameterName);
-
                         return memberExpression;
-
-                    //case ExpressionType.MemberAccess when memberExpression.:
-                    //    _parts.Add(CreateParameter(GetValue(memberExpression)).ParameterName);
-
-                    //    return memberExpression;
                     case ExpressionType.MemberAccess:
-                        //_parts.Add(CreateParameter(GetValue(memberExpression)).ParameterName);
                         MemberExpression exp = memberExpression.Expression as MemberExpression;
                         _parts.Add($"[{exp.Member.Name}].[{memberExpression.Member.Name}]");
-
                         return memberExpression;
                 }
 
@@ -383,12 +360,9 @@ namespace Dapper.TQuery.Development
                 case nameof(Queryable.Where) when methodCallExpression.Method.DeclaringType == typeof(Queryable):
 
                     lambda = (LambdaExpression)StripQuotes(methodCallExpression.Arguments[1]);
-                    if (_where.Count() == 0)
-                    {
                         Visit(lambda.Body);
                         _where.Add(_parts.Join(" "));
                         _parts.Clear();
-                    }
                     
                     foreach (Expression arg in methodCallExpression.Arguments)
                     {
@@ -409,8 +383,18 @@ namespace Dapper.TQuery.Development
                 case nameof(Queryable.GroupBy):
                     return ParseExpression(methodCallExpression, _groupBy);
 
+                case nameof(Queryable.Reverse):
+                    return methodCallExpression;
+
                 case nameof(Queryable.Take):
-                    return ParseExpression(methodCallExpression, ref _take);
+                    if (methodCallExpression.ToString().Contains("Reverse"))
+                    {
+                        return ParseExpression(methodCallExpression, ref _last);
+                    }
+                    else
+                    {
+                        return ParseExpression(methodCallExpression, ref _take);
+                    }
 
                 case nameof(ExpressionToSQL.Bottom):
                     Visit(methodCallExpression.Arguments[0]);
@@ -473,16 +457,28 @@ namespace Dapper.TQuery.Development
 
                 case nameof(Queryable.Join):
                     //left table keys
+                    foreach (Expression arg in methodCallExpression.Arguments)
+                    {
+                        MethodCallExpression expression = arg as MethodCallExpression;
+                        if (expression == null) { continue; }
+                        CurrentMethodCall = expression.Method.Name;
+                        if (arg.NodeType == ExpressionType.Call) Visit(arg); break;
+                    }
                     LambdaExpression leftKeys = (LambdaExpression)StripQuotes(methodCallExpression.Arguments[2]);
                     LambdaExpression joinKeys = (LambdaExpression)StripQuotes(methodCallExpression.Arguments[3]);
                     lambda = (LambdaExpression)StripQuotes(methodCallExpression.Arguments[4]);
-                    TableName = $"[{lambda.Parameters[0].Type.Name}] AS [{lambda.Parameters[0].Name}]";
-                    _join.Add($"[{lambda.Parameters[1].Type.Name}] AS [{lambda.Parameters[1].Name}] ON");
+                    if (firstJoin)
+                    {
+                        TableName = $"[{lambda.Parameters[0].Type.Name}]";
+                    }
                     if (leftKeys.Body.NodeType == ExpressionType.MemberAccess)
                     {
                         MemberExpression leftKey = leftKeys.Body as MemberExpression;
                         MemberExpression joinKey = joinKeys.Body as MemberExpression;
-                        _join.Add($"[{lambda.Parameters[0].Name}].[{leftKey.Member.Name}] = [{lambda.Parameters[1].Name}].[{joinKey.Member.Name}]");
+                        join_tables.Add(leftKey.Expression.Type.Name);
+                        join_tables.Add(joinKey.Expression.Type.Name);
+                        _parts.Add($"[{joinKey.Expression.Type.Name}] ON");
+                        _parts.Add($"[{leftKey.Expression.Type.Name}].[{leftKey.Member.Name}] = [{joinKey.Expression.Type.Name}].[{joinKey.Member.Name}]");
                     }
                     else
                     {
@@ -490,37 +486,54 @@ namespace Dapper.TQuery.Development
                         NewExpression joinMembers = joinKeys.Body as NewExpression;
                         for (int i = 0; i < leftMembers.Arguments.Count; i++)
                         {
-                            if (i > 0) { _join.Add("AND"); }
+                            if (i > 0) { _parts.Add("AND"); }
                             MemberExpression leftKey = leftMembers.Arguments[i] as MemberExpression;
                             MemberExpression joinKey = joinMembers.Arguments[i] as MemberExpression;
-                            _join.Add($"[{lambda.Parameters[0].Name}].[{leftKey.Member.Name}] = [{lambda.Parameters[1].Name}].[{joinKey.Member.Name}]");
+                            _parts.Add($"[{lambda.Parameters[0].Name}].[{leftKey.Member.Name}] = [{lambda.Parameters[1].Name}].[{joinKey.Member.Name}]");
                         }
                     }
-                    //Visit(lambda.Body);
+                    _join.Add($"{_joinType} {_parts.Join(" ")}");
+                    _parts.Clear();
+                    _select.Clear();
+                    List<Expression> expressions = new List<Expression>();
                     switch (lambda.Body.NodeType)
                     {
                         case ExpressionType.Parameter:
-                            ParameterExpression parameter = lambda.Body as ParameterExpression;
-                            _select.Add($"[{parameter.Name}].*");
+                            expressions.Add(lambda.Body);
                             break;
                         case ExpressionType.New:
                             NewExpression newExpression = lambda.Body as NewExpression;
-                            for (int i = 0;i< newExpression.Arguments.Count; i++)
+                            expressions = newExpression.Arguments.ToList();
+                            for (int i = 0;i< expressions.Count; i++)
                             {
-                                if (newExpression.Arguments[i].NodeType == ExpressionType.Parameter)
+                                var currentMember = expressions[i];
+                                if (currentMember.Type.Name.Contains("AnonymousType"))
                                 {
-                                    parameter = newExpression.Arguments[i] as ParameterExpression;
-                                    _select.Add($"[{parameter.Name}].*");
+                                    List<Type> table_types = new List<Type>();
+                                    table_types.AddRange(GetDeepProperties(currentMember.Type));
+                                    table_types.ForEach(x => _select.Add($"[{x.Name}].*"));
                                 }
-                                else if (newExpression.Arguments[i].NodeType == ExpressionType.MemberAccess)
+                                else 
                                 {
-                                    MemberExpression currentMember = newExpression.Arguments[i] as MemberExpression;
-                                    _select.Add($"[{currentMember.Expression.ToString()}].[{currentMember.Member.Name}] AS {newExpression.Members[i].Name}");
+                                    if (join_tables.Contains(currentMember.Type.Name) && currentMember.NodeType == ExpressionType.Parameter)
+                                    {
+                                        _select.Add($"[{currentMember.Type.Name}].*");
+                                    }
+                                    else
+                                    {
+                                        MemberExpression memberExpression = currentMember as MemberExpression;
+                                        _select.Add($"[{memberExpression.Expression.Type.Name}].[{memberExpression.Member.Name}] AS {newExpression.Members[i].Name}");
+                                    }
                                 }
                             }
                             break;
                     }
-                        return methodCallExpression;
+                    firstJoin = false;
+                    return methodCallExpression;
+
+                case nameof(ExpressionToSQL.Delete):
+                    IsDelete = true;
+                    return methodCallExpression;
                 default:
                     if (methodCallExpression.Object != null)
                     {
@@ -812,6 +825,22 @@ namespace Dapper.TQuery.Development
             throw new NotSupportedException();
         }
 
+        IEnumerable<Type> GetDeepProperties(Type type)
+        {
+            var types = type.GetProperties().Select(x => x.PropertyType).ToList();
+            foreach (Type t in types)
+            {
+                if (join_tables.Contains(t.Name))
+                {
+                    yield return t;
+                } else
+                {
+                   foreach (Type _t in GetDeepProperties(t))
+                   yield return _t;
+                }
+            } 
+        }
+
         //more visitors, just for test
 
         protected override Expression VisitBlock(BlockExpression node)
@@ -942,7 +971,7 @@ namespace Dapper.TQuery.Development
         }
         private readonly List<Expression> expressions = new List<Expression>();
 
-        public static Expression PUpdate<T>(Expression<Func<T, T>> selector )
+        internal static Expression PUpdate<T>(Expression<Func<T, T>> selector )
         {
             var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.PUpdate));
             MethodInfo methodInfoGeneric = methodInfo.MakeGenericMethod(typeof(T));
@@ -950,7 +979,7 @@ namespace Dapper.TQuery.Development
             return Expression.Lambda(methodCallExpression);
         }
 
-        public static Expression PSelect<T, TResult>(Expression<Func<T, TResult>> expression)
+        internal static Expression PSelect<T, TResult>(Expression<Func<T, TResult>> expression)
         {
             var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.PSelect));
             MethodInfo methodInfoGeneric = methodInfo.MakeGenericMethod(typeof(T), typeof(TResult));
@@ -958,11 +987,85 @@ namespace Dapper.TQuery.Development
             return Expression.Lambda(methodCallExpression);
         }
 
-        public static Expression Bottom(int predicate)
+        internal static Expression Bottom(int predicate)
         {
             var expression = Expression.Constant(predicate);
             var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Bottom));
-            //MethodInfo methodInfoGeneric = methodInfo.MakeGenericMethod(typeof(int));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression RecCount(int predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.RecCount));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression Count<T,TKey>(Expression<Func<T, TKey>> predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Count));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression Sum<T, TKey>(Expression<Func<T, TKey>> predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Sum));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression Max<T, TKey>(Expression<Func<T, TKey>> predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Max));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+        internal static Expression Min<T, TKey>(Expression<Func<T, TKey>> predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Min));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+        internal static Expression Average<T, TKey>(Expression<Func<T, TKey>> predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Average));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression All<T>(Expression<Func<T, bool>> predicate)
+        {
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.All));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, predicate);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression Any<T>(Expression<Func<T, bool>> predicate)
+        {
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Any));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, predicate);
+            return Expression.Lambda(methodCallExpression);
+        }
+
+        internal static Expression Any(int predicate)
+        {
+            var expression = Expression.Constant(predicate);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Any));
+            MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
+            return Expression.Lambda(methodCallExpression);
+        }
+        internal static Expression Delete(int something)
+        {
+            var expression = Expression.Constant(something);
+            var methodInfo = typeof(ExpressionToSQL).GetMethod(nameof(ExpressionToSQL.Delete));
             MethodCallExpression methodCallExpression = Expression.Call(methodInfo, expression);
             return Expression.Lambda(methodCallExpression);
         }

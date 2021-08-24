@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>Jacob Spitzer</Authors>
     <Company>QuickApps</Company>
     <Product>Dapper.TQuery</Product>
@@ -16,11 +16,13 @@
     <PackageIcon>QuickAppsIco.png</PackageIcon>
     <PackageIconUrl />
     <PackageTags>dapper queryable quickapps</PackageTags>
-    <PackageReleaseNotes>The project is still in beta mode.</PackageReleaseNotes>
+    <PackageReleaseNotes>The project is still in beta mode.
+The current version is trying to fix Assembly bug.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.90" />
+    <PackageReference Include="Dapper.SimpleCRUD" Version="2.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
