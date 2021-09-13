@@ -113,6 +113,8 @@ Attribute | Sql Property | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
 [Key] | PRIMARY KEY | 
 [ForeignKey("TableName")] | FOREIGN KEY |
 [AutoIncrement] | 
+[DefaultValue(true)] | DEFAULT |
+[StringLength(50)] | LENGTH |
 
 #### Create / Modify Tables
 
