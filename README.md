@@ -1,4 +1,8 @@
 # Dapper.TQuery Library
+
+[![NuGet](https://img.shields.io/nuget/v/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
+[![NuGet](https://img.shields.io/nuget/dt/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
+
 ## Description
 Dapper.TQuery is a c# based library package that provides database connection services with the focus on the following three goals:
 * to get the high fastest performance
@@ -40,6 +44,11 @@ CreateTable | limit | exp
 GroupBy, Add/Modify/Delete Column,  
 
 ## Installation
+
+```sh
+dotnet add package Dapper.TQuery
+```
+
 
 ## Basic Usage
 
