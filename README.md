@@ -24,6 +24,21 @@ So I have started to create a new library that is based on ADO.NET, and Dapper. 
 * use Dapper with LINQ QUERYABLE features. With the most (but not all) common features of linq extensions.
 * use the fastest easyest way for CRUD (Create, Read, Update, and Delete) operations, Find by ID, batch insert/update/delete even with Entity List.
 
+## BETA
+This project is still on beta version, since not all planned features are already finished. but it's tested and ready to use as it is.
+The following planned features are still not finished:
+#### Support for other Database platforms.
+The current version 0.2.1 is supporting only MS-SQL SERVER. 
+Planned Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+PS: most of the methods will already work on the other common Database Platforms.
+Here are a list for all known methods that will work only with MS-SQL SERVER and the Explanation of the limit.
+
+Method       | Limit         | Explanation
+------------ | ------------- | ------------------------------
+CreateTable | limit | exp
+#### Coming Methods
+GroupBy, Add/Modify/Delete Column,  
+
 ## Installation
 
 ## Basic Usage
