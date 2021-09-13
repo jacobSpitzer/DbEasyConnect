@@ -47,18 +47,21 @@ Method       | Limit         | Explanation
 CreateTable | limit | exp
 #### Coming Methods
 GroupBy, Add/Modify/Delete Column,  
+#### Support to specifieng a table name different than the class name
 
 ## Installation
 Install with the Package Manager Console in Visual Studio (PowerShell)
 
 ```sh
 PM> Install-Package Dapper.TQuery
+
 ```
 
 install via Dotnet CLI
 
 ```sh
 dotnet add package Dapper.TQuery
+
 ```
 
 
@@ -77,13 +80,37 @@ public class Sample
 and then:
 
 ```sh
-
+// Create a SqlConnection
+var con = new SqlConnection("Server=YOUR.SERVER.COM; Database=DATABASE_NAME; User ID=USER_ID;Password=*******; Trusted_Connection=False; MultipleActiveResultSets=True");
+// Get all records from the Sample Table
+con.TQuery<Sample>().ToList();          
 ```
-
 
 #### Write Table Class
 
+In order to get defined by the Library, you need to write all Table classes with the [Table("TableName")] Attribute. only classes within your current project assembly will work.
+Add the relevant references for that. like:
+
+```sh
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+```
+
+Please note: currently is no matter the table name you specify in the Table attribute. the library will use the Class name to create/find the table on the database server.
+
+
 #### Data Annotations Attributes
+
+You can use some attributes above each field to specify more properties on the field:
+
+Attribute | Sql Property | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
+----------|--------------|---------------|-------|--------|------------|---------|
+[Required] | NOT NULL |
+[Index] | |
+[Index(IsUnique=true)] | UNIQUE
+[Key] | PRIMARY KEY | 
+[ForeignKey("TableName")] | FOREIGN KEY |
+[AutoIncrement] | 
 
 #### Create / Modify Tables
 
