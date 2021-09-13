@@ -14,16 +14,6 @@ namespace Dapper.TQuery.Development
     public static class TQueryExtensions
     {
         //TODO add settings arg to con methods, like CreateAllTables 'SqlDialect sqlDialect = SqlDialect.MsSql, TQueryResultType queryResultType = TQueryResultType.Linq'
-        public static dynamic ReturnDifferentType<T>(this SqlConnection sqlConnection, int i)
-        {
-            if (i > 10)
-            {
-                return new TQueryable<T>(sqlConnection,SqlDialect.MsSql);
-            } else
-            {
-                return new TQueryableSql<T>(sqlConnection, SqlDialect.MsSql);
-            }
-        }
         public static TQueryable<T> TQuery<T>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.MsSql)
         {
             TQueryable<T> query = new TQueryable<T>(sqlConnection,sqlDialect);
@@ -36,11 +26,9 @@ namespace Dapper.TQuery.Development
         }
 
         public static TQueryable<T> Where<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
-        //public static TQueryableFilter<T> Where<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            //var filteredQuery = new TQueryableFilter<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return tQuery;
         }
         public static TQueryable<TResult> Join<TOuter, TInner, TKey, TResult>(this TQueryable<TOuter> outer, TQueryable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector, JoinType joinType = JoinType.InnerJoin)
@@ -132,43 +120,43 @@ namespace Dapper.TQuery.Development
         }
 
         //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        {
-            //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
-            tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-            return _groupedQuery;
-        }
-        //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableFilter<T> tQuery, Expression<Func<T, TKey>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-            return _groupedQuery;
-        }
-        //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableOrder<T> tQuery, Expression<Func<T, TKey>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-            return _groupedQuery;
-        }
+        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
+        //{
+        //    //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
+        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
+        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableFilter<T> tQuery, Expression<Func<T, TKey>> predicate)
+        //{
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
+        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
+        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableOrder<T> tQuery, Expression<Func<T, TKey>> predicate)
+        //{
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
 
 
         public static TQueryableSelect<T> Select<T, TResult>(this TQueryable<T> tQuery, Expression<Func<T, TResult>> expression)
         {
             //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.PSelect(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
             TQueryableSelect<T> _selectedQuery = new TQueryableSelect<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
         public static TQueryableSelect<T> Select<T, TResult>(this TQueryableOrder<T> tQuery, Expression<Func<T, TResult>> expression)
         {
             //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.PSelect(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
             TQueryableSelect<T> _selectedQuery = new TQueryableSelect<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
@@ -181,27 +169,40 @@ namespace Dapper.TQuery.Development
         //    TQueryableJoin<TResult> _JoinQuery = new TQueryableJoin<TResult>() { SqlConnection = outer.SqlConnection, EmptyQuery = empty, SqlString = outer.SqlString };
         //    return _JoinQuery;
         //}
-        //TODO finish and test in expressionToSql
-        public static TQueryableBool<T> All<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        public static bool All<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
+            return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
+        }
+        public static bool Any<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
+            return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
+        }
+        public static bool Any<T>(this TQueryable<T> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
+            return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
+        }
+        public static TQueryableBool<T> All<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
             var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        //TODO finish and test in expressionToSql
-        public static TQueryableBool<T> Any<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        public static TQueryableBool<T> Any<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
             var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        //TODO finish and test in expressionToSql
-        public static TQueryableBool<T> Any<T>(this TQueryable<T> tQuery)
+        public static TQueryableBool<T> Any<T>(this TQueryableSql<T> tQuery)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(0));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
             var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
+
         //public static TQueryable<T> Contains<T>(this TQueryable<T> tQuery, Func<T> predicate)
         //{
 
@@ -291,20 +292,89 @@ namespace Dapper.TQuery.Development
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
         }
+        public static T First<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
 
-        public static TQueryableUpdate<T> Update<T>(this TQueryable<T> tQuery, Expression<Func<T, T>> expression)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.PUpdate(expression));
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<T>(tQuery.SqlString);
+        }
+        public static T FirstOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirstOrDefault<T>(tQuery.SqlString);
+        }
+        public static T Last<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            var exp = ExpressionToSQL.Bottom(1);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
+            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+        }
+        public static T LastOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            var exp = ExpressionToSQL.Bottom(1);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
+            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+        }
+        public static T Single<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+        }
+        public static T SingleOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+        }
+
+        public static int Update<T>(this TQueryable<T> tQuery, Expression<Func<T, T>> expression)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
+            return tQuery.SqlConnection.Execute(tQuery.SqlString);
+        }
+        public static TQueryableUpdate<T> Update<T>(this TQueryableSql<T> tQuery, Expression<Func<T, T>> expression)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
             TQueryableUpdate<T> _updatedQuery = new TQueryableUpdate<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _updatedQuery;
         }
-        public static TQueryableDelete<T> Delete<T>(this TQueryable<T> tQuery)
+        public static int Delete<T>(this TQueryable<T> tQuery)
+        {
+            var exp = ExpressionToSQL.Delete(1);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
+            return tQuery.SqlConnection.Execute(tQuery.SqlString);
+        }
+        public static TQueryableDelete<T> Delete<T>(this TQueryableSql<T> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
             var deleteQuery = new TQueryableDelete<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return deleteQuery;
         }
+        public static void Insert<T>(this TQueryable<T> tQuery, T entity)
+        {
+            List<T> entities = new List<T>();
+            entities.Add(entity);
+            tQuery.InsertList(entities);
+        }
+        public static void Update<T>(this TQueryable<T> tQuery, T entity, string keyColumnName = "Id")
+        {
+            List<T> entities = new List<T>();
+            entities.Add(entity);
+            tQuery.UpdateList(entities,keyColumnName);
+        }
+        public static void Delete<T>(this TQueryable<T> tQuery, T entity, string keyColumnName = "Id")
+        {
+            List<T> entities = new List<T>();
+            entities.Add(entity);
+            tQuery.DeleteList(entities, keyColumnName);
+        }
+
         public static void InsertList<T>(this TQueryable<T> tQuery, List<T> entities)
         {
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
@@ -369,13 +439,21 @@ namespace Dapper.TQuery.Development
             }
             return table;
         }
-        public static TQueryableCreate<T> CreateTable<T>(this TQueryable<T> tQuery)
+        public static int CreateTable<T>(this TQueryable<T> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>() { SqlConnection = tQuery.SqlConnection,
+            return tQuery.SqlConnection.Execute($"CREATE TABLE {table.Name}{CreateSql(table)};");
+        }
+        public static TQueryableCreate<T> CreateTable<T>(this TQueryableSql<T> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<T>()
+            {
+                SqlConnection = tQuery.SqlConnection,
                 SqlString = $"CREATE TABLE {table.Name}{CreateSql(table)};"
             };
         }
+
         internal static TQueryableCreate<T> UpdateTableFromTempSql<T>(this TQueryable<T> tQuery, string keyColumnName = "Id")
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
@@ -410,7 +488,12 @@ namespace Dapper.TQuery.Development
                 SqlString = $"CREATE TABLE #{table.Name}Temp ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});"
             };
         }
-        public static TQueryableCreate<T> CreateTableIfNotExists<T>(this TQueryable<T> tQuery)
+        public static int CreateTableIfNotExists<T>(this TQueryable<T> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute($"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};");
+        }
+        public static TQueryableCreate<T> CreateTableIfNotExists<T>(this TQueryableSql<T> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return new TQueryableCreate<T>()
@@ -419,7 +502,13 @@ namespace Dapper.TQuery.Development
                 SqlString = $"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};"
             };
         }
-        public static TQueryableCreate<T> DropTable<T>(this TQueryable<T> tQuery)
+
+        public static int DropTable<T>(this TQueryable<T> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute($"DROP TABLE {table.Name}");
+        }
+        public static TQueryableCreate<T> DropTable<T>(this TQueryableSql<T> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return new TQueryableCreate<T>()
@@ -428,6 +517,7 @@ namespace Dapper.TQuery.Development
                 SqlString = $"DROP TABLE {table.Name}"
             };
         }
+
         internal static TQueryableCreate<T> DropTable<T>(this SqlConnection sqlConnection, string table)
         {
             return new TQueryableCreate<T>()
@@ -436,7 +526,12 @@ namespace Dapper.TQuery.Development
                 SqlString = $"DROP TABLE {table}"
             };
         }
-        public static TQueryableCreate<T> DropTableIfExists<T>(this TQueryable<T> tQuery)
+        public static int DropTableIfExists<T>(this TQueryable<T> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {table.Name}");
+        }
+        public static TQueryableCreate<T> DropTableIfExists<T>(this TQueryableSql<T> tQuery)
         {
             //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
@@ -446,6 +541,7 @@ namespace Dapper.TQuery.Development
                 SqlString = $"DROP TABLE IF EXISTS {table.Name}"
             };
         }
+
         //public static TQueryCreate DropExtraTableColumns<T>(this TQueryable<T> tQuery)
         //{
         //    //check if is missing columns
@@ -507,7 +603,7 @@ namespace Dapper.TQuery.Development
             foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
             return $"DROP TABLE {table} ;{Environment.NewLine}";
         }
-        public static TQueryableDatabase CreateAllTables(this SqlConnection sqlConnection)
+        public static int CreateAllTables(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
             var hgy = Assembly
@@ -525,10 +621,69 @@ namespace Dapper.TQuery.Development
             {
                 query.SqlString += t.CreateSql() + Environment.NewLine;
             }
+            return sqlConnection.Execute(query.SqlString);
+        }
+        public static int CreateAllTablesIfNotExists(this SqlConnection sqlConnection)
+        {
+            List<Type> types = new List<Type>();
+            var hgy = Assembly
+            .GetEntryAssembly().GetName().Name;
+            Console.WriteLine(hgy);
+            foreach (Type type in Assembly
+            .GetEntryAssembly().GetTypes())
+            {
+                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
+                    types.Add(type);
+            }
+
+            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
+            foreach (var t in types)
+            {
+                query.SqlString += t.CreateIfNotExistsSql() + Environment.NewLine;
+            }
+            return sqlConnection.Execute(query.SqlString);
+        }
+        public static int DropAllTables(this SqlConnection sqlConnection)
+        {
+            List<Type> types = new List<Type>();
+
+            foreach (Type type in Assembly
+            .GetExecutingAssembly().GetTypes())
+            {
+                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
+                    types.Add(type);
+            }
+
+            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
+            foreach (var t in types)
+            {
+                query.SqlString += t.DropSql() + Environment.NewLine;
+            }
+            query.SqlConnection = sqlConnection;
+            return sqlConnection.Execute(query.SqlString);
+        }
+        public static TQueryableDatabase CreateAllTablesSql(this SqlConnection sqlConnection)
+        {
+            List<Type> types = new List<Type>();
+            var hgy = Assembly
+            .GetEntryAssembly().GetName().Name;
+            Console.WriteLine(hgy);
+            foreach (Type type in Assembly
+            .GetEntryAssembly().GetTypes())
+            {
+                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
+                    types.Add(type);
+            }
+
+            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
+            foreach (var t in types)
+            {
+                query.SqlString += t.CreateSql() + Environment.NewLine;
+            }
             query.SqlConnection = sqlConnection;
             return query;
         }
-        public static TQueryableDatabase CreateAllTablesIfNotExists(this SqlConnection sqlConnection)
+        public static TQueryableDatabase CreateAllTablesIfNotExistsSql(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
             var hgy = Assembly
@@ -549,8 +704,7 @@ namespace Dapper.TQuery.Development
             query.SqlConnection = sqlConnection;
             return query;
         }
-
-        public static TQueryableDatabase DropAllTables(this SqlConnection sqlConnection)
+        public static TQueryableDatabase DropAllTablesSql(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
 

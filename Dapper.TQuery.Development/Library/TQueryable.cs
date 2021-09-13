@@ -100,7 +100,7 @@ namespace Dapper.TQuery.Development
     }
     
     public class TQueryableSelect<T> : TQueryGet<T> { }
-    //public interface TQueryableOrder<out T> : TQueryable<T> { }
+    public class TQueryableOrder<T> : TQueryGet<T> { } 
     public class TQueryableFilter<T> : TQueryGet<T> { }
     public class TQueryableGroup<T> : TQueryGet<T> { }
     public class TQueryableJoin<T> : TQueryGet<T> { }
