@@ -86,7 +86,7 @@ var con = new SqlConnection("Server=YOUR.SERVER.COM; Database=DATABASE_NAME; Use
 con.TQuery<Sample>().ToList();          
 ```
 
-#### Write Table Class
+#### How to write a Table Class
 
 In order to get defined by the Library, you need to write all Table classes with the [Table("TableName")] Attribute. only classes within your current project assembly will work.
 Add the relevant references for that. like:
@@ -98,8 +98,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 Please note: currently is no matter the table name you specify in the Table attribute. the library will use the Class name to create/find the table on the database server.
 
+##### Data Types
 
-#### Data Annotations Attributes
+
+##### Data Annotations Attributes
 
 You can use some attributes above each field to specify more properties on the field:
 
