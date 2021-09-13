@@ -4,20 +4,22 @@
 [![NuGet](https://img.shields.io/nuget/dt/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
 
 ## Description
-Dapper.TQuery is a c# based library package that provides database connection services with the focus on the following three goals:
-* to get the high fastest performance
-* to avoid configuration the most possible
-* to support strong typed coding and avoid bugs and spelling mistakes.
+``Dapper.TQuery`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/Dapper.TQuery) package that provides database connection services with the focus on the following three goals:
+* get the high fastest performance
+* avoid configuration the most possible
+* support strong typed coding and avoid bugs and spelling mistakes.
 
-## The short history:
-I was using Entity Framework for a long time and founded difficult to configure the database schema, binding, migrations, and repositories in addition to writing Data Models.
+## background:
+I was using [Entity Framework](https://github.com/dotnet/ef6) for a long time and founded difficult to configure the database schema, binding, migrations, and repositories in addition to writing Data Models.
 
 I also found it difficult to modify any table / filed in the database after the first creation and configuration, that requires to update the database directly, and use migration.
 [Look here a great article by Tim Corey about why to not use Entity Framework](https://www.iamtimcorey.com/blog/137806/entity-framework). including the performance speed.
 
-And then, I found out about the Dapper library, a great open-source library created by the Stack Overflow team.
+And then, I found out about the [Dapper library](https://github.com/DapperLib/Dapper), a great open-source library created by the Stack Overflow team.
 
-But, I found it even hard, because of missing a lot of features provided by EF. like CRUD features on OOP, working with batch insert/update, and the need of writing SQL language, and remember all table/field names, without any warning on spelling mistakes, and missing a LINQ QUERYABLE option, so I need to download the whole table before querying with linq, uses extra memory and lowers the performance. 
+But, I found it even hard, because of missing a lot of features provided by EF. like CRUD features, working with batch insert/update, and the need of writing SQL language, and remember all table/field names, without any warning on spelling mistakes, and missing a LINQ QUERYABLE option, so I need to download the whole table before querying with linq, uses extra memory and lowers the performance.
+
+There are alot of Dapper Extensions, where each extension has his own feature, and his limits and configuration. I was looking for a more simple solution with less configuration, less required packages, simple, and queryable method extensions that are most simular to Linq.
 
 So I have started to create a new library that is based on ADO.NET, and Dapper. But gives you a strong typed coding experience, with all the features listed below.
 
@@ -28,13 +30,16 @@ So I have started to create a new library that is based on ADO.NET, and Dapper. 
 * use Dapper with LINQ QUERYABLE features. With the most (but not all) common features of linq extensions.
 * use the fastest easyest way for CRUD (Create, Read, Update, and Delete) operations, Find by ID, batch insert/update/delete even with Entity List.
 
-## BETA
+## Beta
 This project is still on beta version, since not all planned features are already finished. but it's tested and ready to use as it is.
 The following planned features are still not finished:
 #### Support for other Database platforms.
 The current version 0.2.1 is supporting only MS-SQL SERVER. 
+
 Planned Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+
 PS: most of the methods will already work on the other common Database Platforms.
+
 Here are a list for all known methods that will work only with MS-SQL SERVER and the Explanation of the limit.
 
 Method       | Limit         | Explanation
@@ -44,6 +49,13 @@ CreateTable | limit | exp
 GroupBy, Add/Modify/Delete Column,  
 
 ## Installation
+Install with the Package Manager Console in Visual Studio (PowerShell)
+
+```sh
+PM> Install-Package Dapper.TQuery
+```
+
+install via Dotnet CLI
 
 ```sh
 dotnet add package Dapper.TQuery
@@ -51,6 +63,23 @@ dotnet add package Dapper.TQuery
 
 
 ## Basic Usage
+
+First create a class
+```sh
+[Table("Sample")]
+public class Sample
+{
+    public int Id { get; set; }
+    public string Field { get; set; }
+}
+```
+
+and then:
+
+```sh
+
+```
+
 
 #### Write Table Class
 
