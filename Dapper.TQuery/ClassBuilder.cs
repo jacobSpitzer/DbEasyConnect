@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace Dapper.TQuery.Library
+namespace Dapper.TQuery
 {
     public class ClassBuilder : DynamicObject
     {

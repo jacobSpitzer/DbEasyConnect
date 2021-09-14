@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
-namespace Dapper.TQuery.Library
+namespace Dapper.TQuery
 {
     public static class ExpressionToSQLExtensions
     {
