@@ -203,7 +203,7 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// Sorts the recordss of a TQuery recordset in ascending order according to a key.
+        /// Sorts the records of a TQuery recordset in ascending order according to a key.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by the function that is represented by keySelector.</typeparam>
@@ -247,7 +247,7 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// Sorts the recordss of a TQuery recordset in descending order according to a key.
+        /// Sorts the records of a TQuery recordset in descending order according to a key.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by the function that is represented by keySelector.</typeparam>
@@ -291,31 +291,45 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Projects the TQuery recordset into a new form of a result table by selecting specific columns or calculations to retrieve from the table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryable<Table> tQuery, Expression<Func<Table, TResult>> expression)
+        /// <typeparam name="TResult">The new form type of the fields and calculations returned by selector.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> that contains an queryable table to retrieve the new result type.
+        /// </param>
+        /// <param name="selector">
+        /// An selection of the columns or calculations to be retrieved from the TQuery recordset.
+        /// Example: tQuery.(x=> new { FullName = x.FirstName + x.LastName, Id = x.Id, AfterTax = x.Total * 1.15 });
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSelect{T}"/> whose records are projected into a new form of a record result.
+        /// </returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryable<Table> tQuery, Expression<Func<Table, TResult>> selector)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(selector));
             TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
 
         /// <summary>
-        /// 
+        /// Projects the TQuery recordset into a new form of a result table by selecting specific columns or calculations to retrieve from the table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TResult>> expression)
+        /// <typeparam name="TResult">The new form type of the fields and calculations returned by selector.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableOrder{T}"/> that contains an ordered queryable table to retrieve the new result type.
+        /// </param>
+        /// <param name="selector">
+        /// An selection of the columns or calculations to be retrieved from the TQuery recordset.
+        /// Example: tQuery.(x=> new { FullName = x.FirstName + x.LastName, Id = x.Id, AfterTax = x.Total * 1.15 });
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSelect{T}"/> whose records are projected into a new form of a record result.
+        /// </returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TResult>> selector)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(selector));
             TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
@@ -327,7 +341,7 @@ namespace Dapper.TQuery.Development
         /// The type of the records of table class. need to be a class with the [Table("")] attribute.
         /// </typeparam>
         /// <param name="tQuery">
-        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> whose recordss to apply the predicate to.
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
         /// </param>
         /// <param name="predicate">
         /// A function to test each record for a condition.
@@ -353,7 +367,7 @@ namespace Dapper.TQuery.Development
         /// The type of the records of table class. need to be a class with the [Table("")] attribute.
         /// </typeparam>
         /// <param name="tQuery">
-        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> whose recordss to apply the predicate to.
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
         /// </param>
         /// <param name="predicate">
         /// A function to test each record for a condition.
@@ -395,39 +409,75 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Determines whether all records of a TQuery recordset satisfy a condition.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return true if every record of the TQuery recordset passes the test in the specified
+        /// predicate, or if the recordset is empty; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery or predicate is null.
+        /// </exception>
         public static TQueryableBool<Table> All<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
             var boolQuery = new TQueryableBool<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        
+
         /// <summary>
-        /// 
+        /// Determines whether any record of a TQuery recordset satisfy a condition.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return true if the TQuery recordset is not empty and at least one of its records passes
+        /// the test in the specified predicate; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery or predicate is null.
+        /// </exception>
+
         public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
             var boolQuery = new TQueryableBool<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        
+
         /// <summary>
-        /// 
+        /// Determines whether a TQuery recordset contains any records.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// The <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to check for emptiness.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return
+        /// true if the TQuery recordset contains any records; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery is null.
+        /// </exception>
+
         public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
@@ -436,12 +486,51 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/>.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset.
+        /// </returns>
+        public static Table First<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/>.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset.
+        /// </returns>
+        public static Table First<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
         public static Table First<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -450,56 +539,147 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table FirstOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
+        public static Table First<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset, or NULL if no record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/>.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record is found; otherwise, the first record in TQuery recordset.
+        /// </returns>
+        public static Table? FirstOrDefault<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset, or NULL if no record is found. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table Last<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/>.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record is found; otherwise, the first record in TQuery recordset.
+        /// </returns>
+        public static Table? FirstOrDefault<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the first record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
+        public static Table? FirstOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the first record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
+        public static Table? FirstOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset, and throws an exception if there is not exactly one record. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset.
+        /// </returns>
+        public static Table Single<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset, and throws an exception if there is not exactly one record. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table LastOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset.
+        /// </returns>
+        public static Table Single<Table>(this TQueryableSql<Table> tQuery)
         {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, and throws an exception if there is not exactly one record that satisfies the predicate function. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
         public static Table Single<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -508,100 +688,71 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, and throws an exception if there is not exactly one record that satisfies the predicate function. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table SingleOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table First<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
-
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table FirstOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table Last<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table LastOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
         public static Table Single<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
-        
+
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset, or NULL if no such record is found, and throws an exception if there is not exactly one record. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table SingleOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record found; otherwise, the single record in TQuery recordset.
+        /// </returns>
+        public static Table? SingleOrDefault<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset, or NULL if no such record is found, and throws an exception if there is not exactly one record. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record found; otherwise, the single record in TQuery recordset.
+        /// </returns>
+        public static Table? SingleOrDefault<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found, and throws an exception if there is not exactly one record that satisfies the predicate function. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the single record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
+        public static Table? SingleOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
@@ -609,12 +760,27 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found, and throws an exception if there is not exactly one record that satisfies the predicate function. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the single record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
+        public static Table? SingleOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+        
         public static int Update<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, Table>> expression)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
