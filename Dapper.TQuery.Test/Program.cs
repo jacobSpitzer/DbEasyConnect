@@ -15,7 +15,7 @@ namespace Dapper.TQuery.Test
             //IQueryable<ForumUser> query = list.AsQueryable();
             //Console.WriteLine("");
             var con = new SqlConnection("Server=hgws27.win.hostgator.com; Database=quickpps_test; User ID=quickpps_test;Password=Hj4d6~4q; Trusted_Connection=False; MultipleActiveResultSets=True");
-            //var i = con.CreateAllTables();
+            var i = con.Open()//.CreateAllTables();
             //i = con.TQuery<ForumUser>().CreateTableIfNotExits().Execute();
             //var tables = con.GetAllTablesType();
             //var sql = con.CreateAllTables().Execute();

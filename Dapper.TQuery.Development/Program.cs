@@ -2,8 +2,10 @@
 using MyDapper.Tables;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using Dapper;
 
 namespace TQuerykjkj
 {
@@ -11,9 +13,12 @@ namespace TQuerykjkj
     {
         static void Main(string[] args)
         {
-            var con = new SqlConnection("Server=hgws27.win.hostgator.com; Database=quickpps_test; User ID=quickpps_test;Password=Hj4d6~4q; Trusted_Connection=False; MultipleActiveResultSets=True");
-            //var hfg = con.TQuery<ForumUser>().Where(x => x.IsDelete == true).Where(x => x.Role > 5).SqlString;
-            var g = con.CreateAllTablesIfNotExists().Execute();
+            List<ForumUser> forums = new List<ForumUser>();
+            forums.AsQueryable().Where(x => x.IsDelete);
+            IDbConnection con = new SqlConnection("Server=hgws27.win.hostgator.com; Database=quickpps_test; User ID=quickpps_test;Password=Hj4d6~4q; Trusted_Connection=False; MultipleActiveResultSets=True");
+            
+            var hfg = con.TQuery<ForumUser>().Where(x => x.IsDelete == true).Where(x => x.Role > 5).SqlString;
+            var g = con.CreateAllTablesIfNotExists();//.Execute();
             var kjj = con.GetAllDbTablesType();
             List<ForumUser> forumUsers = new List<ForumUser>();
             for (var i = 0; i < 6; i++)

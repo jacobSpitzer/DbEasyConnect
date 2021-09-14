@@ -145,7 +145,7 @@ namespace Dapper.TQuery.Development
         /// <summary>
         /// MS SQL Server
         /// </summary>
-        MsSql,
+        SqlServer,
 
         /// <summary>
         /// MySql
@@ -153,9 +153,14 @@ namespace Dapper.TQuery.Development
         MySql,
 
         /// <summary>
+        /// Oracle
+        /// </summary>
+        Oracle,
+
+        /// <summary>
         /// SQLite
         /// </summary>
-        SqLite,
+        SQLite,
 
         /// <summary>
         /// PostgreSql

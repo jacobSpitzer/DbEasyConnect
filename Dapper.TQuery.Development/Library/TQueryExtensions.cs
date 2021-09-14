@@ -14,23 +14,116 @@ namespace Dapper.TQuery.Development
     public static class TQueryExtensions
     {
         //TODO add settings arg to con methods, like CreateAllTables 'SqlDialect sqlDialect = SqlDialect.MsSql, TQueryResultType queryResultType = TQueryResultType.Linq'
-        public static TQueryable<T> TQuery<T>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.MsSql)
+        /// <summary>
+        /// Initializes a new instance of the Dapper.TQuery.TQueryable`1 class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="sqlConnection">
+        /// The System.Data.SqlClient.SqlConnection`1 to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant Dapper.TQuery.SqlDialect`1 for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect 'SqlDialect.SqlServer' will be used.
+        /// </param>
+        /// <returns>
+        /// An Dapper.TQuery.TQueryable`1 instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// </returns>
+        /// <exception cref=""></exception>
+        ///         
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static TQueryable<Table> TQuery<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
-            TQueryable<T> query = new TQueryable<T>(sqlConnection,sqlDialect);
-            return query;
-        }
-        public static TQueryableSql<T> TQuerySql<T>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.MsSql)
-        {            
-            TQueryableSql<T> query = new TQueryableSql<T>(sqlConnection,sqlDialect);
+            TQueryable<Table> query = new TQueryable<Table>(sqlConnection,sqlDialect);
             return query;
         }
 
-        public static TQueryable<T> Where<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        /// <summary>
+        /// Initializes a new instance of the Dapper.TQuery.TQueryableSql`1 class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="sqlConnection">
+        /// The System.Data.SqlClient.SqlConnection`1 to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant Dapper.TQuery.SqlDialect`1 for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect 'SqlDialect.SqlServer' will be used.
+        /// </param>
+        /// <returns>
+        /// An Dapper.TQuery.TQueryableSql`1 instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        /// <exception cref=""></exception>
+        ///         
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static TQueryableSql<Table> TQuerySql<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {            
+            TQueryableSql<Table> query = new TQueryableSql<Table>(sqlConnection,sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Filters a TQuery recordset based on a predicate.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An Dapper.TQuery.TQueryable`1 that contains the queryable table to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each element for a condition.
+        /// </param>
+        /// <returns>
+        /// An Dapper.TQuery.TQueryable`1 that contains records from the input sequence that
+        /// satisfy the condition specified by predicate.
+        /// </returns>
+        public static TQueryable<Table> Where<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery;
         }
+
+        /// <summary>
+        /// Correlates the records of two TQuery recordsets based on matching keys. A specified
+        /// System.Collections.Generic.IEqualityComparer`1 is used to compare keys.
+        /// </summary>
+        /// <typeparam name="TOuter">
+        /// The table type of the records of the first table.
+        /// </typeparam>
+        /// <typeparam name="TInner">
+        /// The table type of the records of the second/joined table.
+        /// </typeparam>
+        /// <typeparam name="TKey">
+        /// The type of the keys returned by the key selector functions.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        /// The type of the result records.
+        /// </typeparam>
+        /// <param name="outer">
+        /// The first TQuery recordset to join.
+        /// </param>
+        /// <param name="inner">The TQuery recordset to join to the first TQuery recordset.</param>
+        /// <param name="outerKeySelector">
+        /// A function to extract the join key from each record of the first recordset.
+        /// </param>
+        /// <param name="innerKeySelector">
+        /// A function to extract the join key from each record of the second recordset.
+        /// </param>
+        /// <param name="resultSelector">
+        /// A function to create a result record from two joined table records.
+        /// </param>
+        /// <param name="joinType">
+        /// A join type selected by the Dapper.TQuery.JoinType enum. Available options: InnerJoin, LeftJoin, RightJoin, FullJoin. If no option is selected, The default will be InnerJoin.
+        /// </param>
+        /// <returns>
+        /// An Dapper.TQuery.TQueryable`1 that has records of type TResult obtained by performing
+        /// an inner join on two TQuery recordsets.
+        /// </returns>
         public static TQueryable<TResult> Join<TOuter, TInner, TKey, TResult>(this TQueryable<TOuter> outer, TQueryable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector, JoinType joinType = JoinType.InnerJoin)
         {
             if (outer.EmptyQuery == null) { outer.EmptyQuery = Enumerable.Empty<TOuter>().AsQueryable(); }
@@ -39,75 +132,132 @@ namespace Dapper.TQuery.Development
             TQueryable<TResult> _JoinQuery = new TQueryable<TResult>(outer.SqlConnection, outer.SqlDialect) { EmptyQuery = empty, SqlString = outer.SqlString };
             return _JoinQuery;
         }
-        public static TQueryable<T> Take<T>(this TQueryable<T> tQuery, int predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryable<Table> Take<Table>(this TQueryable<Table> tQuery, int predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Take(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
 
             return tQuery;
         }
-        public static TQueryable<T> Skip<T>(this TQueryable<T> tQuery, int predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryable<Table> Skip<Table>(this TQueryable<Table> tQuery, int predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Skip(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery;
         }
-        public static TQueryable<T> Top<T>(this TQueryable<T> tQuery, int predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryable<Table> Top<Table>(this TQueryable<Table> tQuery, int predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Take(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery;
         }
-        public static TQueryable<T> Bottom<T>(this TQueryable<T> tQuery, int predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryable<Table> Bottom<Table>(this TQueryable<Table> tQuery, int predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Reverse().Take(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery;
         }
-        //public static TQueryable<T> Distinct<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
 
-        //    return tQuery;
-        //}
-        //public static TQueryable<T> Union<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
-
-        //    return tQuery;
-        //}
-
-        public static TQueryableOrder<T> OrderBy<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableOrder<Table> OrderBy<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.OrderBy(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            var orderedQuery = new TQueryableOrder<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            var orderedQuery = new TQueryableOrder<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return orderedQuery;
         }
-        public static TQueryableOrder<T> ThenBy<T, TKey>(this TQueryableOrder<T> tQuery, Expression<Func<T, TKey>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableOrder<Table> ThenBy<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> predicate)
         {
-            if (typeof(IOrderedQueryable<T>).IsAssignableFrom(tQuery.EmptyQuery.Expression.Type))
+            if (typeof(IOrderedQueryable<Table>).IsAssignableFrom(tQuery.EmptyQuery.Expression.Type))
             {
-                IOrderedQueryable<T> orderedQuery = (IOrderedQueryable<T>)tQuery.EmptyQuery;
+                IOrderedQueryable<Table> orderedQuery = (IOrderedQueryable<Table>)tQuery.EmptyQuery;
                 tQuery.EmptyQuery = orderedQuery.ThenBy(predicate);
             } else
             {
                 tQuery.EmptyQuery = tQuery.EmptyQuery.OrderBy(predicate);
             }
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableOrder<T> _orderedQuery = new TQueryableOrder<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            TQueryableOrder<Table> _orderedQuery = new TQueryableOrder<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _orderedQuery;
         }
-        public static TQueryableOrder<T> OrderByDescending<T, TKey>(this TQueryable<T> tQuery, Func<T, TKey> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableOrder<Table> OrderByDescending<Table, TKey>(this TQueryable<Table> tQuery, Func<Table, TKey> predicate)
         {
-            tQuery.EmptyQuery = (IQueryable<T>)tQuery.EmptyQuery.OrderByDescending(predicate);
+            tQuery.EmptyQuery = (IQueryable<Table>)tQuery.EmptyQuery.OrderByDescending(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableOrder<T> _orderedQuery = new TQueryableOrder<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            TQueryableOrder<Table> _orderedQuery = new TQueryableOrder<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _orderedQuery;
         }
-        public static TQueryableOrder<T> ThenByDescending<T, TKey>(this TQueryableOrder<T> tQuery, Expression<Func<T, TKey>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableOrder<Table> ThenByDescending<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> predicate)
         {
-            if (typeof(IOrderedQueryable<T>).IsAssignableFrom(tQuery.EmptyQuery.Expression.Type))
+            if (typeof(IOrderedQueryable<Table>).IsAssignableFrom(tQuery.EmptyQuery.Expression.Type))
             {
-                IOrderedQueryable<T> orderedQuery = (IOrderedQueryable<T>)tQuery.EmptyQuery;
+                IOrderedQueryable<Table> orderedQuery = (IOrderedQueryable<Table>)tQuery.EmptyQuery;
                 tQuery.EmptyQuery = orderedQuery.ThenByDescending(predicate);
             }
             else
@@ -115,285 +265,460 @@ namespace Dapper.TQuery.Development
                 tQuery.EmptyQuery = tQuery.EmptyQuery.OrderByDescending(predicate);
             }
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            TQueryableOrder<T> _orderedQuery = new TQueryableOrder<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            TQueryableOrder<Table> _orderedQuery = new TQueryableOrder<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _orderedQuery;
         }
 
-        //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _groupedQuery;
-        //}
-        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableFilter<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _groupedQuery;
-        //}
-        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<T> GroupBy<T, TKey>(this TQueryableOrder<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<T> _groupedQuery = new TQueryableGroup<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _groupedQuery;
-        //}
-
-
-        public static TQueryableSelect<T> Select<T, TResult>(this TQueryable<T> tQuery, Expression<Func<T, TResult>> expression)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryable<Table> tQuery, Expression<Func<Table, TResult>> expression)
         {
-            //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
-            TQueryableSelect<T> _selectedQuery = new TQueryableSelect<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-            return _selectedQuery;
-        }
-        public static TQueryableSelect<T> Select<T, TResult>(this TQueryableOrder<T> tQuery, Expression<Func<T, TResult>> expression)
-        {
-            //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
-            TQueryableSelect<T> _selectedQuery = new TQueryableSelect<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
 
-        //public static TQueryableJoin<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this TQueryable<TOuter> outer, TQueryable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector)
-        //{
-        //    if (outer.EmptyQuery == null) { outer.EmptyQuery = Enumerable.Empty<TOuter>().AsQueryable(); }
-        //    IQueryable<TResult> empty = outer.EmptyQuery.Join(Enumerable.Empty<TInner>().AsQueryable(), outerKeySelector, innerKeySelector, resultSelector).AsQueryable();
-        //    outer.SqlString = new ExpressionToSQL(empty, outer.EmptyQuery.GroupBy(outerKeySelector).Expression, "JOIN");
-        //    TQueryableJoin<TResult> _JoinQuery = new TQueryableJoin<TResult>() { SqlConnection = outer.SqlConnection, EmptyQuery = empty, SqlString = outer.SqlString };
-        //    return _JoinQuery;
-        //}
-        public static bool All<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TResult>> expression)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
+            TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            return _selectedQuery;
+        }
+
+        ///
+        /// Summary:
+        ///     Determines whether all records of a TQuery recordset satisfy a condition.
+        ///
+        /// Parameters:
+        ///   tQuery:
+        ///     An Dapper.TQuery.TQueryable`1 that contains the queryable table to apply
+        ///     the predicate to.
+        ///
+        ///   predicate:
+        ///     A function to test each record for a condition.
+        ///
+        /// Type parameters:
+        ///   Table:
+        ///     The type of the records of table class. need to be a class with the [Table("")] attribute.
+        ///
+        /// Returns:
+        ///     true if every record of the TQuery recordset passes the test in the specified
+        ///     predicate, or if the recordset is empty; otherwise, false.
+        ///
+        /// Exceptions:
+        ///   T:System.ArgumentNullException:
+        ///     TQuery or predicate is null.
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static bool All<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
             return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
         }
-        public static bool Any<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// Determines whether any record of a TQuery recordset satisfy a condition.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// An Dapper.TQuery.TQueryable`1 whose recordss to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// true if the TQuery recordset is not empty and at least one of its records passes
+        /// the test in the specified predicate; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery or predicate is null.
+        /// </exception>
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static bool Any<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
             return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
         }
-        public static bool Any<T>(this TQueryable<T> tQuery)
+
+        /// <summary>
+        /// Determines whether a TQuery recordset contains any records.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// The Dapper.TQuery.TQueryable`1 to check for emptiness.
+        /// </param>
+        /// <returns>
+        /// true if the TQuery recordset contains any records; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery is null.
+        /// </exception>
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static bool Any<Table>(this TQueryable<Table> tQuery)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
             return tQuery.SqlConnection.Query<bool>(tQuery.SqlString).FirstOrDefault();
         }
-        public static TQueryableBool<T> All<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableBool<Table> All<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
-            var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            var boolQuery = new TQueryableBool<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        public static TQueryableBool<T> Any<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
-            var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            var boolQuery = new TQueryableBool<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
-        public static TQueryableBool<T> Any<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
-            var boolQuery = new TQueryableBool<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            var boolQuery = new TQueryableBool<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return boolQuery;
         }
 
-        //public static TQueryable<T> Contains<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
-
-        //    return tQuery;
-        //}
-        //public static TQueryable<T> Aggregate<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
-
-        //    return tQuery;
-        //}
-        //public static TQueryableCalc<T> Count<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Count(predicate));
-        //    TQueryableCalc<T> _calcQuery = new TQueryableCalc<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _calcQuery;
-        //}
-        //public static TQueryableCount<T> Count<T>(this TQueryable<T> tQuery)
-        //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.RecCount(0));
-        //    TQueryableCount<T> _calcQuery = new TQueryableCount<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _calcQuery;
-        //}
-        //public static TQueryableCalc<T> Average<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Average(predicate));
-        //    TQueryableCalc<T> _calcQuery = new TQueryableCalc<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _calcQuery;
-        //}
-        //public static TQueryableCalc<T> Max<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Max(predicate));
-        //    TQueryableCalc<T> _calcQuery = new TQueryableCalc<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _calcQuery;
-        //}
-        //public static TQueryableCalc<T> Sum<T, TKey>(this TQueryable<T> tQuery, Expression<Func<T, TKey>> predicate)
-        //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Sum(predicate));
-        //    TQueryableCalc<T> _calcQuery = new TQueryableCalc<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
-        //    return _calcQuery;
-        //}
-        //public static TQueryable<T> ElementAt<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
-
-        //    return tQuery;
-        //}
-        //public static TQueryable<T> ElementAtOrDefault<T>(this TQueryable<T> tQuery, Func<T> predicate)
-        //{
-
-        //    return tQuery;
-        //}
-        public static T First<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table First<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirst<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
         }
-        public static T FirstOrDefault<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table FirstOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirstOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
         }
-        public static T Last<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table Last<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             var exp = ExpressionToSQL.Bottom(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
-        public static T LastOrDefault<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table LastOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             var exp = ExpressionToSQL.Bottom(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
         }
-        public static T Single<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table Single<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
-        public static T SingleOrDefault<T>(this TQueryable<T> tQuery, Expression<Func<T, bool>> predicate)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table SingleOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
         }
-        public static T First<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table First<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
 
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirst<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
         }
-        public static T FirstOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table FirstOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirstOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
         }
-        public static T Last<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table Last<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             var exp = ExpressionToSQL.Bottom(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
-        public static T LastOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table LastOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             var exp = ExpressionToSQL.Bottom(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
         }
-        public static T Single<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table Single<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingle<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
-        public static T SingleOrDefault<T>(this TQueryableSql<T> tQuery, Expression<Func<T, bool>> predicate)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Table SingleOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingleOrDefault<T>(tQuery.SqlString);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
         }
 
-        public static int Update<T>(this TQueryable<T> tQuery, Expression<Func<T, T>> expression)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static int Update<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, Table>> expression)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
             return tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
-        public static TQueryableUpdate<T> Update<T>(this TQueryableSql<T> tQuery, Expression<Func<T, T>> expression)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static TQueryableUpdate<Table> Update<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, Table>> expression)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
-            TQueryableUpdate<T> _updatedQuery = new TQueryableUpdate<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            TQueryableUpdate<Table> _updatedQuery = new TQueryableUpdate<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _updatedQuery;
         }
-        public static int Delete<T>(this TQueryable<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static int Delete<Table>(this TQueryable<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
             return tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
-        public static TQueryableDelete<T> Delete<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableDelete<Table> Delete<Table>(this TQueryableSql<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            var deleteQuery = new TQueryableDelete<T>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+            var deleteQuery = new TQueryableDelete<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return deleteQuery;
         }
-        public static void Insert<T>(this TQueryable<T> tQuery, T entity)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entity"></param>
+        public static void Insert<Table>(this TQueryable<Table> tQuery, Table entity)
         {
-            List<T> entities = new List<T>();
+            List<Table> entities = new List<Table>();
             entities.Add(entity);
             tQuery.InsertList(entities);
         }
-        public static void Update<T>(this TQueryable<T> tQuery, T entity, string keyColumnName = "Id")
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entity"></param>
+        /// <param name="keyColumnName"></param>
+        public static void Update<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
-            List<T> entities = new List<T>();
+            List<Table> entities = new List<Table>();
             entities.Add(entity);
             tQuery.UpdateList(entities,keyColumnName);
         }
-        public static void Delete<T>(this TQueryable<T> tQuery, T entity, string keyColumnName = "Id")
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entity"></param>
+        /// <param name="keyColumnName"></param>
+        public static void Delete<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
-            List<T> entities = new List<T>();
+            List<Table> entities = new List<Table>();
             entities.Add(entity);
             tQuery.DeleteList(entities, keyColumnName);
         }
 
-        public static void InsertList<T>(this TQueryable<T> tQuery, List<T> entities)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entities"></param>
+        public static void InsertList<Table>(this TQueryable<Table> tQuery, List<Table> entities)
         {
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
             {
-                copy.DestinationTableName = typeof(T).Name;
+                copy.DestinationTableName = typeof(Table).Name;
                 tQuery.SqlConnection.Open();
                 copy.WriteToServer(ToDataTable(entities));
                 tQuery.SqlConnection.Close();
             }
         }
-        public static void UpdateList<T>(this TQueryable<T> tQuery, List<T> entities, string keyColumnName = "Id")
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entities"></param>
+        /// <param name="keyColumnName"></param>
+        public static void UpdateList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
-            if (typeof(T).GetProperty(keyColumnName) == null)
+            if (typeof(Table).GetProperty(keyColumnName) == null)
             {
-                throw new NullReferenceException($"Missing column name '{keyColumnName}' in table '{typeof(T).Name}'.");
+                throw new NullReferenceException($"Missing column name '{keyColumnName}' in table '{typeof(Table).Name}'.");
             }
-            var tableName = typeof(T).Name;
+            var tableName = typeof(Table).Name;
             tQuery.SqlConnection.Open();
-            tQuery.SqlConnection.TQuery<T>().CreateTempTable().Execute();
+            tQuery.SqlConnection.TQuery<Table>().CreateTempTable().Execute();
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
             {
                 copy.DestinationTableName = $"#{tableName}Temp";
@@ -404,15 +729,23 @@ namespace Dapper.TQuery.Development
             }
             tQuery.SqlConnection.Close();
         }
-        public static void DeleteList<T>(this TQueryable<T> tQuery, List<T> entities, string keyColumnName = "Id")
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <param name="entities"></param>
+        /// <param name="keyColumnName"></param>
+        public static void DeleteList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
-            if (typeof(T).GetProperty(keyColumnName) == null)
+            if (typeof(Table).GetProperty(keyColumnName) == null)
             {
-                throw new NullReferenceException($"Missing column name '{keyColumnName}' in table '{typeof(T).Name}'.");
+                throw new NullReferenceException($"Missing column name '{keyColumnName}' in table '{typeof(Table).Name}'.");
             }
-            var tableName = typeof(T).Name;
+            var tableName = typeof(Table).Name;
             tQuery.SqlConnection.Open();
-            tQuery.SqlConnection.TQuery<T>().CreateTempTable().Execute();
+            tQuery.SqlConnection.TQuery<Table>().CreateTempTable().Execute();
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
             {
                 copy.DestinationTableName = $"#{tableName}Temp";
@@ -423,14 +756,14 @@ namespace Dapper.TQuery.Development
             }
             tQuery.SqlConnection.Close();
         }
-        internal static DataTable ToDataTable<T>(this IList<T> data)
+        internal static DataTable ToDataTable<Table>(this IList<Table> data)
         {
             PropertyDescriptorCollection properties =
-                TypeDescriptor.GetProperties(typeof(T));
+                TypeDescriptor.GetProperties(typeof(Table));
             DataTable table = new DataTable();
             foreach (PropertyDescriptor prop in properties)
                 table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-            foreach (T item in data)
+            foreach (Table item in data)
             {
                 DataRow row = table.NewRow();
                 foreach (PropertyDescriptor prop in properties)
@@ -439,129 +772,163 @@ namespace Dapper.TQuery.Development
             }
             return table;
         }
-        public static int CreateTable<T>(this TQueryable<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static int CreateTable<Table>(this TQueryable<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return tQuery.SqlConnection.Execute($"CREATE TABLE {table.Name}{CreateSql(table)};");
         }
-        public static TQueryableCreate<T> CreateTable<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableCreate<Table> CreateTable<Table>(this TQueryableSql<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"CREATE TABLE {table.Name}{CreateSql(table)};"
             };
         }
 
-        internal static TQueryableCreate<T> UpdateTableFromTempSql<T>(this TQueryable<T> tQuery, string keyColumnName = "Id")
+        internal static TQueryableCreate<Table> UpdateTableFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             var props = table.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add($"[T].[{field.Name}] = [Temp].[{field.Name}]"); }
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"UPDATE T SET {fields.Join(", ")} FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];"
             };
         }
-        internal static TQueryableCreate<T> DeleteRecordsFromTempSql<T>(this TQueryable<T> tQuery, string keyColumnName = "Id")
+        internal static TQueryableCreate<Table> DeleteRecordsFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"DELETE T FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];"
             };
         }
-        internal static TQueryableCreate<T> CreateTempTable<T>(this TQueryable<T> tQuery)
+        internal static TQueryableCreate<Table> CreateTempTable<Table>(this TQueryable<Table> tQuery)
         {
-            //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             var props = table.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"CREATE TABLE #{table.Name}Temp ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});"
             };
         }
-        public static int CreateTableIfNotExists<T>(this TQueryable<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static int CreateTableIfNotExists<Table>(this TQueryable<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return tQuery.SqlConnection.Execute($"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};");
         }
-        public static TQueryableCreate<T> CreateTableIfNotExists<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableCreate<Table> CreateTableIfNotExists<Table>(this TQueryableSql<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};"
             };
         }
 
-        public static int DropTable<T>(this TQueryable<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static int DropTable<Table>(this TQueryable<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return tQuery.SqlConnection.Execute($"DROP TABLE {table.Name}");
         }
-        public static TQueryableCreate<T> DropTable<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableCreate<Table> DropTable<Table>(this TQueryableSql<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"DROP TABLE {table.Name}"
             };
         }
 
-        internal static TQueryableCreate<T> DropTable<T>(this SqlConnection sqlConnection, string table)
+        internal static TQueryableCreate<Table> DropTable<Table>(this SqlConnection sqlConnection, string table)
         {
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = sqlConnection,
                 SqlString = $"DROP TABLE {table}"
             };
         }
-        public static int DropTableIfExists<T>(this TQueryable<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static int DropTableIfExists<Table>(this TQueryable<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return tQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {table.Name}");
         }
-        public static TQueryableCreate<T> DropTableIfExists<T>(this TQueryableSql<T> tQuery)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery"></param>
+        /// <returns></returns>
+        public static TQueryableCreate<Table> DropTableIfExists<Table>(this TQueryableSql<Table> tQuery)
         {
-            //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<T>().AsQueryable(); }
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<T>()
+            return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
                 SqlString = $"DROP TABLE IF EXISTS {table.Name}"
             };
         }
 
-        //public static TQueryCreate DropExtraTableColumns<T>(this TQueryable<T> tQuery)
-        //{
-        //    //check if is missing columns
-        //    //
-        //}
-        //public static TQueryCreate AddMissingTableColumns<T>(this TQueryable<T> tQuery)
-        //{
-        //    //check if is missing columns
-        //    //
-        //}
-        //public static TQueryCreate ModifyTableColumnsDataType<T>(this TQueryable<T> tQuery)
-        //{
-        //    //check if is missing columns
-        //    //
-        //}
-        //public static TQueryCreate RenameTableColumns<T>(this TQueryable<T> tQuery)
-        //{
-        //    //check if is missing columns
-        //    //
-        //}
         private static string CreateSql(this Type type)
         {
             var table = type.Name;
@@ -603,6 +970,12 @@ namespace Dapper.TQuery.Development
             foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
             return $"DROP TABLE {table} ;{Environment.NewLine}";
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static int CreateAllTables(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -623,6 +996,12 @@ namespace Dapper.TQuery.Development
             }
             return sqlConnection.Execute(query.SqlString);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static int CreateAllTablesIfNotExists(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -643,6 +1022,12 @@ namespace Dapper.TQuery.Development
             }
             return sqlConnection.Execute(query.SqlString);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static int DropAllTables(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -662,6 +1047,12 @@ namespace Dapper.TQuery.Development
             query.SqlConnection = sqlConnection;
             return sqlConnection.Execute(query.SqlString);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static TQueryableDatabase CreateAllTablesSql(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -683,6 +1074,12 @@ namespace Dapper.TQuery.Development
             query.SqlConnection = sqlConnection;
             return query;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static TQueryableDatabase CreateAllTablesIfNotExistsSql(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -704,6 +1101,12 @@ namespace Dapper.TQuery.Development
             query.SqlConnection = sqlConnection;
             return query;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static TQueryableDatabase DropAllTablesSql(this SqlConnection sqlConnection)
         {
             List<Type> types = new List<Type>();
@@ -723,6 +1126,12 @@ namespace Dapper.TQuery.Development
             query.SqlConnection = sqlConnection;
             return query;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static Dictionary<string, object> GetAllDbTablesType(this SqlConnection sqlConnection)
         {
             sqlConnection.Open();
@@ -745,6 +1154,12 @@ namespace Dapper.TQuery.Development
             }
             return tables;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static bool IsEqualServerDbToCodeDb(this SqlConnection sqlConnection)
         {
             sqlConnection.Open();
@@ -779,6 +1194,12 @@ namespace Dapper.TQuery.Development
 
             return true;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public static List<CompareDb> GetDiffServerDbToCodeDb(this SqlConnection sqlConnection)
         {
             sqlConnection.Open();
@@ -831,6 +1252,124 @@ namespace Dapper.TQuery.Development
                 TableName = table; ServerField = serverFld; ServerType = serverType; CodeField = codeFld;  CodeType = codeType; Description = desc;
             }
         }
+
+        //public static TQueryable<Table> Distinct<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+        //public static TQueryable<Table> Union<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+
+        //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
+        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<Table>().AsQueryable(); }
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
+        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
+        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryableFilter<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
+        ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
+        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _groupedQuery;
+        //}
+
+        //public static TQueryableJoin<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this TQueryable<TOuter> outer, TQueryable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector)
+        //{
+        //    if (outer.EmptyQuery == null) { outer.EmptyQuery = Enumerable.Empty<TOuter>().AsQueryable(); }
+        //    IQueryable<TResult> empty = outer.EmptyQuery.Join(Enumerable.Empty<TInner>().AsQueryable(), outerKeySelector, innerKeySelector, resultSelector).AsQueryable();
+        //    outer.SqlString = new ExpressionToSQL(empty, outer.EmptyQuery.GroupBy(outerKeySelector).Expression, "JOIN");
+        //    TQueryableJoin<TResult> _JoinQuery = new TQueryableJoin<TResult>() { SqlConnection = outer.SqlConnection, EmptyQuery = empty, SqlString = outer.SqlString };
+        //    return _JoinQuery;
+        //}
+
+        //public static TQueryable<Table> Contains<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+        //public static TQueryable<Table> Aggregate<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+        //public static TQueryableCalc<Table> Count<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Count(predicate));
+        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _calcQuery;
+        //}
+        //public static TQueryableCount<Table> Count<Table>(this TQueryable<Table> tQuery)
+        //{
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.RecCount(0));
+        //    TQueryableCount<Table> _calcQuery = new TQueryableCount<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _calcQuery;
+        //}
+        //public static TQueryableCalc<Table> Average<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Average(predicate));
+        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _calcQuery;
+        //}
+        //public static TQueryableCalc<Table> Max<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Max(predicate));
+        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _calcQuery;
+        //}
+        //public static TQueryableCalc<Table> Sum<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //{
+        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Sum(predicate));
+        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    return _calcQuery;
+        //}
+        //public static TQueryable<Table> ElementAt<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+        //public static TQueryable<Table> ElementAtOrDefault<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //{
+
+        //    return tQuery;
+        //}
+
+        //public static TQueryCreate DropExtraTableColumns<Table>(this TQueryable<Table> tQuery)
+        //{
+        //    //check if is missing columns
+        //    //
+        //}
+        //public static TQueryCreate AddMissingTableColumns<Table>(this TQueryable<Table> tQuery)
+        //{
+        //    //check if is missing columns
+        //    //
+        //}
+        //public static TQueryCreate ModifyTableColumnsDataType<Table>(this TQueryable<Table> tQuery)
+        //{
+        //    //check if is missing columns
+        //    //
+        //}
+        //public static TQueryCreate RenameTableColumns<Table>(this TQueryable<Table> tQuery)
+        //{
+        //    //check if is missing columns
+        //    //
+        //}
 
     }
 
