@@ -13,7 +13,8 @@
 I was using [Entity Framework](https://github.com/dotnet/ef6) for a long time and found it difficult to configure the database schema, binding, migrations, and repositories in addition to writing Data Models.
 
 I also found it difficult to modify any table / field in the database after the first creation and configuration, that requires to update the database directly, and use migration.
-[Take a look here, a great article by Tim Corey about using Entity Framework](https://www.iamtimcorey.com/blog/137806/entity-framework). including the performance speed.
+
+[See a great article by Tim Corey about using Entity Framework](https://www.iamtimcorey.com/blog/137806/entity-framework). including the performance speed.
 
 And then, I found out about the [Dapper library](https://github.com/DapperLib/Dapper), a great open-source library created by the Stack Overflow team.
 
