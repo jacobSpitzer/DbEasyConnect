@@ -5,9 +5,9 @@
 
 ## Description
 ``Dapper.TQuery`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/Dapper.TQuery) package that provides database connection services with the focus on the following three goals:
-* get the fastest performance
-* avoid configuration as much as possible
-* support strong typed coding and avoid bugs and spelling mistakes.
+* Get the fastest performance
+* Avoid configuration as much as possible
+* Support strong typed coding and avoid bugs and spelling mistakes.
 
 ## background:
 I was using [Entity Framework](https://github.com/dotnet/ef6) for a long time and found it difficult to configure the database schema, binding, migrations, and repositories in addition to writing Data Models.
@@ -57,7 +57,7 @@ PM> Install-Package Dapper.TQuery
 
 ```
 
-install via Dotnet CLI
+Install via Dotnet CLI
 
 ```sh
 dotnet add package Dapper.TQuery
