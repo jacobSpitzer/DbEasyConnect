@@ -18,6 +18,11 @@
     <PackageTags>dapper queryable quickapps</PackageTags>
     <PackageReleaseNotes>The project is still in beta mode.
 The current version is trying to fix Assembly bug.</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/jacobSpitzer/Dapper.TQuery</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ApplicationIcon>C:\Users\User\Downloads\QuickAppsIco.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +34,10 @@ The current version is trying to fix Assembly bug.</PackageReleaseNotes>
 
   <ItemGroup>
     <None Include="..\..\..\..\Downloads\QuickAppsIco.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
