@@ -18,7 +18,7 @@ I also found it difficult to modify any table / field in the database after the 
 
 And then, I found out about the [Dapper library](https://github.com/DapperLib/Dapper), a great open-source library created by the Stack Overflow team.
 
-But, even that I found hard to use, because it's missing a lot of features provided by EF. like CRUD features, working with batch insert/update, and it has the need of writing SQL and remember all table/field names, without any warnings on spelling mistakes, and missing a LINQ QUERYABLE option, so I need to download the whole table before querying with linq, which uses extra memory and lowers the performance.
+But, even that I found hard to use, because it's missing a lot of features provided by EF. like CRUD features, working with bulk insert/update, and it has the need of writing SQL and remember all table/field names, without any warnings on spelling mistakes, and missing a LINQ QUERYABLE option, so I need to download the whole table before querying with linq, which uses extra memory and lowers the performance.
 
 There are alot of Dapper Extensions, where each extension has their own set of features, and thier limits and configurations. I was looking for a simpler solution with less configurations, less required packages, simple, and queryable method extensions that are similar to Linq.
 
@@ -29,7 +29,7 @@ So I started to create a new library that is based on ADO.NET, and Dapper. But g
 * Gives a strong typed coding experience, to querying the database similar to entity framework, to avoid spelling mistakes, and to show the table fields while writing the code.
 * Stop writing any extra code for creating / migration. You just need to create classes with [Table] attribute, and some Data Annotations Attributes.
 * Use Dapper with LINQ QUERYABLE features. With the most (but not all) common features of Linq extensions.
-* Use the fastest easiest way for CRUD (Create, Read, Update, and Delete) operations, Find by ID, batch insert/update/delete even with Entity List.
+* Use the fastest easiest way for CRUD (Create, Read, Update, and Delete) operations, Find by ID, bulk insert/update/delete even with Entity List.
 
 ## Beta
 This project is still in beta version, since not all planned features are already finished. but it's tested and ready to use it as is.
