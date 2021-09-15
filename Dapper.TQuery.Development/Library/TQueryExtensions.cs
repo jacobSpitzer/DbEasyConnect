@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace Dapper.TQuery.Development
 {
@@ -421,7 +422,7 @@ namespace Dapper.TQuery.Development
         /// A function to test each record for a condition.
         /// </param>
         /// <returns>
-        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return true if every record of the TQuery recordset passes the test in the specified
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the SQL command will return true if every record of the TQuery recordset passes the test in the specified
         /// predicate, or if the recordset is empty; otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -447,7 +448,7 @@ namespace Dapper.TQuery.Development
         /// A function to test each record for a condition.
         /// </param>
         /// <returns>
-        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return true if the TQuery recordset is not empty and at least one of its records passes
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the SQL command will return true if the TQuery recordset is not empty and at least one of its records passes
         /// the test in the specified predicate; otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -471,7 +472,7 @@ namespace Dapper.TQuery.Development
         /// The <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to check for emptiness.
         /// </param>
         /// <returns>
-        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the Execute() method extension will return
+        /// An <see cref="Dapper.TQuery.Development.TQueryableBool{T}"/> instance, which the SQL command will return
         /// true if the TQuery recordset contains any records; otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -780,46 +781,75 @@ namespace Dapper.TQuery.Development
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
         }
-        
+
+        /// <summary>
+        /// Updates one or more columns on all records of the TQuery recordset to the database table by the predicate assignment(s).  
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="expression">
+        /// The columns to be updated with their new value assignment.
+        /// Example: TQuery<'Sample>().Update(x => new Sample { MyProperty = x.MyInteger + 5, MyString = null, MyBool = true, MyOtherString = "something" })
+        /// </param>
+        /// <returns>
+        /// The number of records updated successfully.
+        /// </returns>        
         public static int Update<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, Table>> expression)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
             return tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
-        
+
         /// <summary>
-        /// 
+        /// Updates one or more columns on all records of the TQuery recordset to the database table by the predicate assignment(s).  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableUpdate<Table> Update<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, Table>> expression)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="assignment">
+        /// The columns to be updated with their new value assignment.
+        /// Example: TQuery<'Sample>().Update(x => new Sample { MyProperty = x.MyInteger + 5, MyString = null, MyBool = true, MyOtherString = "something" })
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableUpdate{T}"/> instance, which the SQL command will update records in the database, and <see cref="Dapper.TQuery.Development.TQueryExecute{T}.Execute"/> will return the number of records updated successfully.
+        /// </returns>
+        public static TQueryableUpdate<Table> Update<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, Table>> assignment)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(assignment));
             TQueryableUpdate<Table> _updatedQuery = new TQueryableUpdate<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _updatedQuery;
         }
-        
+
         /// <summary>
-        /// 
+        /// Deletes all records of the TQuery recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <returns>
+        /// The number of records deleted successfully.
+        /// </returns> 
         public static int Delete<Table>(this TQueryable<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
             return tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
-        
+
         /// <summary>
-        /// 
+        /// Deletes all records of the TQuery recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryableSql{T}"/> to perform the update command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.Development.TQueryableDelete{T}"/> instance, which the SQL command will delete records in the database, and <see cref="Dapper.TQuery.Development.TQueryExecute{T}.Execute"/> will return the number of records deleted successfully.
+        /// </returns>
         public static TQueryableDelete<Table> Delete<Table>(this TQueryableSql<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
@@ -827,41 +857,124 @@ namespace Dapper.TQuery.Development
             var deleteQuery = new TQueryableDelete<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return deleteQuery;
         }
-        
+
         /// <summary>
-        /// 
+        /// Returns a list of all entities from table.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/>.</param>
+        /// <returns>
+        /// All records in TQuery table.
+        /// </returns>
+        // TODO handle partial results.if some of the ids was found and some not.
+        public static IEnumerable<Table>? GetAll<Table>(this TQueryable<Table> tQuery)
+        {
+            return tQuery.ToList();
+        }
+
+        /// <summary>
+        /// Returns a single entity by a single id from table.
+        /// Id must be marked with [Key] attribute.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/>.</param>
+        /// <param name="id">Id of the entity to get, must be marked with [Key] attribute</param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
+        /// <returns>
+        /// The record in TQuery recordset with the given id, or NULL if id not found.
+        /// </returns>
+        //TODO check if table has key, and remove the keyColumName param.
+        public static Table? Find<Table>(this TQueryable<Table> tQuery, long id, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>($"SELECT * FROM {tableName} WHERE {keyColumnName}=@Id", new { Id = id });
+        }
+
+        /// <summary>
+        /// Returns a list of entities from table by a list of given ids.
+        /// Id must be marked with [Key] attribute.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/>.</param>
+        /// <param name="ids">Id of the entity to get, must be marked with [Key] attribute</param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
+        /// <returns>
+        /// The records in TQuery recordset with the given ids, or NULL if no id was found.
+        /// </returns>
+        // TODO handle partial results.if some of the ids was found and some not.
+        public static IEnumerable<Table> Find<Table>(this TQueryable<Table> tQuery, long[] ids, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            return tQuery.SqlConnection.Query<Table>($"SELECT * FROM {tableName} WHERE {keyColumnName} IN @Ids", new { Ids = ids });
+        }
+
+        /// <summary>
+        /// Inserts an entity into table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to insert.
+        /// </param>
         public static void Insert<Table>(this TQueryable<Table> tQuery, Table entity)
         {
             List<Table> entities = new List<Table>();
             entities.Add(entity);
             tQuery.InsertList(entities);
         }
-        
+
         /// <summary>
-        /// 
+        /// Inserts an entity into table and returns identity id.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to insert.
+        /// </param>
+        /// <returns>
+        /// Identity id of the new inserted record.
+        /// </returns>
+        public static int InsertAndReturnId<Table>(this TQueryable<Table> tQuery, Table entity)
+        {
+            return tQuery.SqlConnection.QuerySingle<int>($"{tQuery.InsertQueryBuilder()};SELECT CAST(SCOPE_IDENTITY() as int)",entity);
+        }
+
+        /// <summary>
+        /// Updates an entity in table.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to update.
+        /// </param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
         public static void Update<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
             List<Table> entities = new List<Table>();
             entities.Add(entity);
             tQuery.UpdateList(entities,keyColumnName);
         }
-        
+
         /// <summary>
-        /// 
+        /// Deletes an entity from table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the delete command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to delete.
+        /// </param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
         public static void Delete<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
             List<Table> entities = new List<Table>();
@@ -870,11 +983,15 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// 
+        /// Inserts a list of entities into table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to insert.
+        /// </param>
         public static void InsertList<Table>(this TQueryable<Table> tQuery, List<Table> entities)
         {
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
@@ -885,14 +1002,47 @@ namespace Dapper.TQuery.Development
                 tQuery.SqlConnection.Close();
             }
         }
-        
+
         /// <summary>
-        /// 
+        /// Inserts a list of entities into table and returns a list of identity ids.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to insert.
+        /// </param>
+        /// <returns>
+        /// List of identity ids of the new inserted records.
+        /// </returns>
+        public static IEnumerable<int> InsertListAndReturnIds<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            var sql = tQuery.InsertFromTempSql(keyColumnName);
+            tQuery.SqlConnection.Open();
+            tQuery.SqlConnection.TQuery<Table>().CreateTempTable().Execute();
+            using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
+            {
+                copy.DestinationTableName = $"#{tableName}Temp";
+                copy.WriteToServer(ToDataTable(entities));
+            }
+            IEnumerable<int> result = tQuery.SqlConnection.Query<int>(sql);
+            tQuery.SqlConnection.Close();
+            return result;
+        }
+
+
+        /// <summary>
+        /// Updates a list of entities in table.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to update.
+        /// </param>
         public static void UpdateList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
             if (typeof(Table).GetProperty(keyColumnName) == null)
@@ -906,20 +1056,23 @@ namespace Dapper.TQuery.Development
             {
                 copy.DestinationTableName = $"#{tableName}Temp";
                 copy.WriteToServer(ToDataTable(entities));
-                var sql = tQuery.UpdateTableFromTempSql(keyColumnName).SqlString;
+                var sql = tQuery.UpdateTableFromTempSql(keyColumnName);
                 var cmd = new SqlCommand(sql, tQuery.SqlConnection);
                 cmd.ExecuteNonQuery();
             }
             tQuery.SqlConnection.Close();
         }
-        
+
         /// <summary>
-        /// 
+        /// Deletes a list of entities from table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.Development.TQueryable{T}"/> to perform the delete command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to delete.
+        /// </param>
         public static void DeleteList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
             if (typeof(Table).GetProperty(keyColumnName) == null)
@@ -984,17 +1137,37 @@ namespace Dapper.TQuery.Development
             };
         }
 
-        internal static TQueryableCreate<Table> UpdateTableFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
+        internal static string InsertQueryBuilder<Table>(this TQueryable<Table> tQuery)
+        {
+
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            var props = table.GetProperties().ToList();
+            StringBuilder columns = new StringBuilder();
+            StringBuilder values = new StringBuilder();
+            foreach (PropertyInfo field in props)
+            {
+                columns.Append($"{field.Name}, ");
+                values.Append($"@{field.Name}, ");
+            }
+
+            string insertQuery = $"({ columns.ToString().TrimEnd(',', ' ')}) VALUES ({ values.ToString().TrimEnd(',', ' ')}) ";
+            return insertQuery;
+        }
+        internal static string UpdateTableFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             var props = table.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add($"[T].[{field.Name}] = [Temp].[{field.Name}]"); }
-            return new TQueryableCreate<Table>()
-            {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"UPDATE T SET {fields.Join(", ")} FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];"
-            };
+            return $"UPDATE T SET {fields.Join(", ")} FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];";
+        }
+        internal static string InsertFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            var props = table.GetProperties().ToList();
+            List<string> fields = new List<string>();
+            foreach (PropertyInfo field in props) { fields.Add($"[T].[{field.Name}]"); }
+            return $"INSERT INTO [{table.Name}] OUTPUT INSERTED.{keyColumnName} SELECT {fields.Join(", ")} FROM [#{table.Name}Temp] T; DROP TABLE [#{table.Name}Temp]; ";
         }
         internal static TQueryableCreate<Table> DeleteRecordsFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {

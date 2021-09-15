@@ -19,14 +19,14 @@ namespace Dapper.TQuery.Development
     }
     public abstract class TQueryGet<T>: TQuery<T>
     {
-        public List<T> ToList()
+        public List<T>? ToList()
         {
             if (String.IsNullOrEmpty(SqlString))
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
                 SqlString = new ExpressionToSQL(EmptyQuery);
             }
-            return SqlConnection.Query<T>(SqlString).ToList();
+            return SqlConnection.Query<T>(SqlString)?.ToList();
         }
         public Task<IEnumerable<T>> ToListAsync()
         {
