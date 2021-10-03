@@ -8,12 +8,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace Dapper.TQuery
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class TQueryExtensions
     {
-        //TODO add settings arg to con methods, like CreateAllTables 'SqlDialect sqlDialect = SqlDialect.MsSql, TQueryResultType queryResultType = TQueryResultType.Linq'
         /// <summary>
         /// Initializes a new instance of the <see cref="Dapper.TQuery.TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
@@ -61,6 +64,50 @@ namespace Dapper.TQuery
         public static TQueryableSql<Table> TQuerySql<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
             TQueryableSql<Table> query = new TQueryableSql<Table>(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Dapper.TQuery.TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="sqlConnection">
+        /// The <see cref="System.Data.SqlClient.SqlConnection"/> to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="Dapper.TQuery.SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="Dapper.TQuery.SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> instanse which will be used to query and/or modify the Database with TQuery method extensions.
+        /// </returns>
+        ///         
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static TQueryDatabase TQueryDb<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Dapper.TQuery.TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="sqlConnection">
+        /// The <see cref="System.Data.SqlClient.SqlConnection"/> to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="Dapper.TQuery.SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="Dapper.TQuery.SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> instanse which will be used to query and/or modify the Database with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        ///         
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        public static TQueryDatabase TQueryDbSql<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -201,7 +248,7 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// Sorts the recordss of a TQuery recordset in ascending order according to a key.
+        /// Sorts the records of a TQuery recordset in ascending order according to a key.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by the function that is represented by keySelector.</typeparam>
@@ -246,7 +293,7 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// Sorts the recordss of a TQuery recordset in descending order according to a key.
+        /// Sorts the records of a TQuery recordset in descending order according to a key.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by the function that is represented by keySelector.</typeparam>
@@ -273,16 +320,16 @@ namespace Dapper.TQuery
         /// </param>
         /// <param name="keySelector">A function to extract a field from an TQuery recordset</param>
         /// <returns>An <see cref="Dapper.TQuery.TQueryableOrder{T}"/> whose records are sorted according to a key.</returns>
-        public static TQueryableOrder<Table> ThenByDescending<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        public static TQueryableOrder<Table> ThenByDescending<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> keySelector)
         {
             if (typeof(IOrderedQueryable<Table>).IsAssignableFrom(tQuery.EmptyQuery.Expression.Type))
             {
                 IOrderedQueryable<Table> orderedQuery = (IOrderedQueryable<Table>)tQuery.EmptyQuery;
-                tQuery.EmptyQuery = orderedQuery.ThenByDescending(predicate);
+                tQuery.EmptyQuery = orderedQuery.ThenByDescending(keySelector);
             }
             else
             {
-                tQuery.EmptyQuery = tQuery.EmptyQuery.OrderByDescending(predicate);
+                tQuery.EmptyQuery = tQuery.EmptyQuery.OrderByDescending(keySelector);
             }
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             TQueryableOrder<Table> _orderedQuery = new TQueryableOrder<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
@@ -290,31 +337,45 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Projects the TQuery recordset into a new form of a result table by selecting specific columns or calculations to retrieve from the table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryable<Table> tQuery, Expression<Func<Table, TResult>> expression)
+        /// <typeparam name="TResult">The new form type of the fields and calculations returned by selector.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> that contains an queryable table to retrieve the new result type.
+        /// </param>
+        /// <param name="selector">
+        /// An selection of the columns or calculations to be retrieved from the TQuery recordset.
+        /// Example: tQuery.(x=> new { FullName = x.FirstName + x.LastName, Id = x.Id, AfterTax = x.Total * 1.15 });
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableSelect{T}"/> whose records are projected into a new form of a record result.
+        /// </returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryable<Table> tQuery, Expression<Func<Table, TResult>> selector)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(selector));
             TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
 
         /// <summary>
-        /// 
+        /// Projects the TQuery recordset into a new form of a result table by selecting specific columns or calculations to retrieve from the table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TResult>> expression)
+        /// <typeparam name="TResult">The new form type of the fields and calculations returned by selector.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableOrder{T}"/> that contains an ordered queryable table to retrieve the new result type.
+        /// </param>
+        /// <param name="selector">
+        /// An selection of the columns or calculations to be retrieved from the TQuery recordset.
+        /// Example: tQuery.(x=> new { FullName = x.FirstName + x.LastName, Id = x.Id, AfterTax = x.Total * 1.15 });
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableSelect{T}"/> whose records are projected into a new form of a record result.
+        /// </returns>
+        public static TQueryableSelect<Table> Select<Table, TResult>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TResult>> selector)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Select(selector));
             TQueryableSelect<Table> _selectedQuery = new TQueryableSelect<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _selectedQuery;
         }
@@ -326,7 +387,7 @@ namespace Dapper.TQuery
         /// The type of the records of table class. need to be a class with the [Table("")] attribute.
         /// </typeparam>
         /// <param name="tQuery">
-        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> whose recordss to apply the predicate to.
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
         /// </param>
         /// <param name="predicate">
         /// A function to test each record for a condition.
@@ -352,7 +413,7 @@ namespace Dapper.TQuery
         /// The type of the records of table class. need to be a class with the [Table("")] attribute.
         /// </typeparam>
         /// <param name="tQuery">
-        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> whose recordss to apply the predicate to.
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
         /// </param>
         /// <param name="predicate">
         /// A function to test each record for a condition.
@@ -394,12 +455,24 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Determines whether all records of a TQuery recordset satisfy a condition.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableBool{T}"/> instance, which the SQL command will return true if every record of the TQuery recordset passes the test in the specified
+        /// predicate, or if the recordset is empty; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery or predicate is null.
+        /// </exception>
         public static TQueryableBool<Table> All<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.All(predicate));
@@ -408,12 +481,25 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Determines whether any record of a TQuery recordset satisfy a condition.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableBool{T}"/> instance, which the SQL command will return true if the TQuery recordset is not empty and at least one of its records passes
+        /// the test in the specified predicate; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery or predicate is null.
+        /// </exception>
+
         public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Any(predicate));
@@ -422,11 +508,22 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Determines whether a TQuery recordset contains any records.
         /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="tQuery">
+        /// The <see cref="Dapper.TQuery.TQueryableSql{T}"/> to check for emptiness.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableBool{T}"/> instance, which the SQL command will return
+        /// true if the TQuery recordset contains any records; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// TQuery is null.
+        /// </exception>
+
         public static TQueryableBool<Table> Any<Table>(this TQueryableSql<Table> tQuery)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.ExistsAny(0));
@@ -435,12 +532,51 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/>.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset.
+        /// </returns>
+        public static Table First<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/>.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset.
+        /// </returns>
+        public static Table First<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
         public static Table First<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -449,12 +585,73 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The first record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
+        public static Table First<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
+        }
+
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset, or NULL if no record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/>.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record is found; otherwise, the first record in TQuery recordset.
+        /// </returns>
+        public static Table FirstOrDefault<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset, or NULL if no record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/>.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record is found; otherwise, the first record in TQuery recordset.
+        /// </returns>
+        public static Table FirstOrDefault<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the first record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
         public static Table FirstOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -463,85 +660,20 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Executes a single-row query, returning the first record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table Last<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table LastOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table Single<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table SingleOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table First<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
-
-        {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-            return tQuery.SqlConnection.QueryFirst<Table>(tQuery.SqlString);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the first record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
         public static Table FirstOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -550,42 +682,70 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset, and throws an exception if there is not exactly one record. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table Last<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset.
+        /// </returns>
+        public static Table Single<Table>(this TQueryable<Table> tQuery)
         {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
             return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset, and throws an exception if there is not exactly one record. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public static Table LastOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset.
+        /// </returns>
+        public static Table Single<Table>(this TQueryableSql<Table> tQuery)
         {
-            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
-            var exp = ExpressionToSQL.Bottom(1);
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, exp);
-            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, and throws an exception if there is not exactly one record that satisfies the predicate function. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
+        public static Table Single<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingle<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, and throws an exception if there is not exactly one record that satisfies the predicate function. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// The single record in the TQuery recordset that passes the test in the specified predicate function.
+        /// </returns>
         public static Table Single<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -594,12 +754,74 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Returning the only record of the TQuery recordset, or NULL if no such record is found, and throws an exception if there is not exactly one record. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record found; otherwise, the single record in TQuery recordset.
+        /// </returns>
+        public static Table SingleOrDefault<Table>(this TQueryable<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset, or NULL if no such record is found, and throws an exception if there is not exactly one record. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record found; otherwise, the single record in TQuery recordset.
+        /// </returns>
+        public static Table SingleOrDefault<Table>(this TQueryableSql<Table> tQuery)
+        {
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found, and throws an exception if there is not exactly one record that satisfies the predicate function. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the single record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
+        public static Table SingleOrDefault<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, bool>> predicate)
+        {
+            tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
+            return tQuery.SqlConnection.QuerySingleOrDefault<Table>(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Returning the only record of the TQuery recordset that satisfies a specified condition, or NULL if no such record is found, and throws an exception if there is not exactly one record that satisfies the predicate function. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each record for a condition.
+        /// </param>
+        /// <returns>
+        /// NULL if TQuery recordset is empty or if no record passes the test specified
+        /// by predicate; otherwise, the single record in TQuery recordset that passes the test specified
+        /// by predicate.
+        /// </returns>
         public static Table SingleOrDefault<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, bool>> predicate)
         {
             tQuery.EmptyQuery = tQuery.EmptyQuery.Where(predicate);
@@ -608,12 +830,19 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Updates one or more columns on all records of the TQuery recordset to the database table by the predicate assignment(s).  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="expression">
+        /// The columns to be updated with their new value assignment.
+        /// Example: TQuery&lt;Sample&gt;().Update(x =&gt; new Sample { MyProperty = x.MyInteger + 5, MyString = null, MyBool = true, MyOtherString = "something" })
+        /// </param>
+        /// <returns>
+        /// The number of records updated successfully.
+        /// </returns>        
         public static int Update<Table>(this TQueryable<Table> tQuery, Expression<Func<Table, Table>> expression)
         {
             tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
@@ -621,25 +850,36 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Updates one or more columns on all records of the TQuery recordset to the database table by the predicate assignment(s).  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static TQueryableUpdate<Table> Update<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, Table>> expression)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="assignment">
+        /// The columns to be updated with their new value assignment.
+        /// Example: TQuery&lt;Sample&gt;().Update(x =&gt; new Sample { MyProperty = x.MyInteger + 5, MyString = null, MyBool = true, MyOtherString = "something" })
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableUpdate{T}"/> instance, which the SQL command will update records in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will return the number of records updated successfully.
+        /// </returns>
+        public static TQueryableUpdate<Table> Update<Table>(this TQueryableSql<Table> tQuery, Expression<Func<Table, Table>> assignment)
         {
-            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(expression));
+            tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Update(assignment));
             TQueryableUpdate<Table> _updatedQuery = new TQueryableUpdate<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
             return _updatedQuery;
         }
 
         /// <summary>
-        /// 
+        /// Deletes all records of the TQuery recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <returns>
+        /// The number of records deleted successfully.
+        /// </returns> 
         public static int Delete<Table>(this TQueryable<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
@@ -648,11 +888,15 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Deletes all records of the TQuery recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the update command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableDelete{T}"/> instance, which the SQL command will delete records in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will return the number of records deleted successfully.
+        /// </returns>
         public static TQueryableDelete<Table> Delete<Table>(this TQueryableSql<Table> tQuery)
         {
             var exp = ExpressionToSQL.Delete(1);
@@ -662,11 +906,68 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Returns a list of all entities from table.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/>.</param>
+        /// <returns>
+        /// All records in TQuery table.
+        /// </returns>
+        // TODO handle partial results.if some of the ids was found and some not.
+        public static IEnumerable<Table> GetAll<Table>(this TQueryable<Table> tQuery)
+        {
+            return tQuery.ToList();
+        }
+
+        /// <summary>
+        /// Returns a single entity by a single id from table.
+        /// Id must be marked with [Key] attribute.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/>.</param>
+        /// <param name="id">Id of the entity to get, must be marked with [Key] attribute</param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
+        /// <returns>
+        /// The record in TQuery recordset with the given id, or NULL if id not found.
+        /// </returns>
+        //TODO check if table has key, and remove the keyColumName param.
+        public static Table Find<Table>(this TQueryable<Table> tQuery, long id, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            return tQuery.SqlConnection.QueryFirstOrDefault<Table>($"SELECT * FROM {tableName} WHERE {keyColumnName}=@Id", new { Id = id });
+        }
+
+        /// <summary>
+        /// Returns a list of entities from table by a list of given ids.
+        /// Id must be marked with [Key] attribute.
+        /// </summary>
+        /// <typeparam name="Table"></typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/>.</param>
+        /// <param name="ids">Id of the entity to get, must be marked with [Key] attribute</param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
+        /// <returns>
+        /// The records in TQuery recordset with the given ids, or NULL if no id was found.
+        /// </returns>
+        // TODO handle partial results.if some of the ids was found and some not.
+        public static IEnumerable<Table> Find<Table>(this TQueryable<Table> tQuery, long[] ids, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            return tQuery.SqlConnection.Query<Table>($"SELECT * FROM {tableName} WHERE {keyColumnName} IN @Ids", new { Ids = ids });
+        }
+
+        /// <summary>
+        /// Inserts an entity into table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to insert.
+        /// </param>
         public static void Insert<Table>(this TQueryable<Table> tQuery, Table entity)
         {
             List<Table> entities = new List<Table>();
@@ -675,12 +976,34 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Inserts an entity into table and returns identity id.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to insert.
+        /// </param>
+        /// <returns>
+        /// Identity id of the new inserted record.
+        /// </returns>
+        public static int InsertAndReturnId<Table>(this TQueryable<Table> tQuery, Table entity)
+        {
+            return tQuery.SqlConnection.QuerySingle<int>($"{tQuery.InsertQueryBuilder()};SELECT CAST(SCOPE_IDENTITY() as int)", entity);
+        }
+
+        /// <summary>
+        /// Updates an entity in table.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to update.
+        /// </param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
         public static void Update<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
             List<Table> entities = new List<Table>();
@@ -689,12 +1012,16 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Deletes an entity from table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entity"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the delete command.
+        /// </param>
+        /// <param name="entity">
+        /// An single entity to delete.
+        /// </param>
+        /// <param name="keyColumnName"> The column name of the primary key. </param>
         public static void Delete<Table>(this TQueryable<Table> tQuery, Table entity, string keyColumnName = "Id")
         {
             List<Table> entities = new List<Table>();
@@ -703,11 +1030,15 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Inserts a list of entities into table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to insert.
+        /// </param>
         public static void InsertList<Table>(this TQueryable<Table> tQuery, List<Table> entities)
         {
             using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
@@ -720,12 +1051,48 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Inserts a list of entities into table and returns a list of identity ids.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the insert command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to insert.
+        /// </param>
+        /// <param name="keyColumnName">The column that contains the Key/Id that will be used to return</param>
+        /// <returns>
+        /// List of identity ids of the new inserted records.
+        /// </returns>
+        public static IEnumerable<int> InsertListAndReturnIds<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
+        {
+            var tableName = typeof(Table).Name;
+            var sql = tQuery.InsertFromTempSql(keyColumnName);
+            tQuery.SqlConnection.Open();
+            tQuery.SqlConnection.TQuery<Table>().CreateTempTable().Execute();
+            using (var copy = new SqlBulkCopy(tQuery.SqlConnection))
+            {
+                copy.DestinationTableName = $"#{tableName}Temp";
+                copy.WriteToServer(ToDataTable(entities));
+            }
+            IEnumerable<int> result = tQuery.SqlConnection.Query<int>(sql);
+            tQuery.SqlConnection.Close();
+            return result;
+        }
+
+
+        /// <summary>
+        /// Updates a list of entities in table.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the update command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to update.
+        /// </param>
+        /// <param name="keyColumnName">The column that contains the Key/Id that will be used to recognize the record to update</param>
+
         public static void UpdateList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
             if (typeof(Table).GetProperty(keyColumnName) == null)
@@ -739,7 +1106,7 @@ namespace Dapper.TQuery
             {
                 copy.DestinationTableName = $"#{tableName}Temp";
                 copy.WriteToServer(ToDataTable(entities));
-                var sql = tQuery.UpdateTableFromTempSql(keyColumnName).SqlString;
+                var sql = tQuery.UpdateTableFromTempSql(keyColumnName);
                 var cmd = new SqlCommand(sql, tQuery.SqlConnection);
                 cmd.ExecuteNonQuery();
             }
@@ -747,12 +1114,16 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Deletes a list of entities from table.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <param name="entities"></param>
-        /// <param name="keyColumnName"></param>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the delete command.
+        /// </param>
+        /// <param name="entities">
+        /// An list of entities to delete.
+        /// </param>
+        /// <param name="keyColumnName">The column that contains the Key/Id that will be used to recognize the record to delete</param>
         public static void DeleteList<Table>(this TQueryable<Table> tQuery, List<Table> entities, string keyColumnName = "Id")
         {
             if (typeof(Table).GetProperty(keyColumnName) == null)
@@ -790,44 +1161,246 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Creates a Table on the server database, based on the code table properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static int CreateTable<Table>(this TQueryable<Table> tQuery)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Create Table command.
+        /// </param>
+        public static void CreateTable<Table>(this TQueryable<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return tQuery.SqlConnection.Execute($"CREATE TABLE {table.Name}{CreateSql(table)};");
+            tQuery.SqlConnection.Execute(CreateSql(table));
         }
 
         /// <summary>
-        /// 
+        /// Creates a Table on the server database, based on the code table properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Create Table command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Create Table command.
+        /// </returns>
         public static TQueryableCreate<Table> CreateTable<Table>(this TQueryableSql<Table> tQuery)
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             return new TQueryableCreate<Table>()
             {
                 SqlConnection = tQuery.SqlConnection,
-                SqlString = $"CREATE TABLE {table.Name}{CreateSql(table)};"
+                SqlString = CreateSql(table)
             };
         }
 
-        internal static TQueryableCreate<Table> UpdateTableFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
+        /// <summary>
+        /// Overrides a Table on the server database, based on the code table properties. 
+        /// Caution! This action will DELETE the current table on the Server with all the records, and then create a new blank Table with the current code properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Create Table command.
+        /// </param>
+        public static int OverrideTable<Table>(this TQueryable<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute($"DROP TABLE {table.Name};{Environment.NewLine}{CreateSql(table)}");
+        }
+
+        /// <summary>
+        /// Overrides a Table on the server database, based on the code table properties. 
+        /// Caution! This action will DELETE the current table on the Server with all the records, and then create a new blank Table with the current code properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Override Table command.
+        /// </param>
+        ///<returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will Override the Table in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Override Table command.
+        /// </returns>
+        public static TQueryableCreate<Table> OverrideTable<Table>(this TQueryableSql<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<Table>()
+            {
+                SqlConnection = tQuery.SqlConnection,
+                SqlString = $"DROP TABLE {table.Name};{Environment.NewLine}{CreateSql(table)}"
+            };
+        }
+
+        //TODO add more options on modify column, like column name by specifieng the old name, and change/add/remove attributes.
+        /// <summary>
+        /// Modifies a table definition on the server database by altering, adding, or dropping columns and column datatypes, based on the code table properties. 
+        /// Available modifications: Add field, Remove field, Change field datatype. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Modify Table command.
+        /// </param>
+        public static int ModifyTable<Table>(this TQueryable<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute(ModifySql(table, tQuery.SqlConnection));
+        }
+
+        //TODO add more options on modify column, like column name by specifieng the old name, and change/add/remove attributes.
+        /// <summary>
+        /// Modifies a table definition on the server database by altering, adding, or dropping columns and column datatypes, based on the code table properties. 
+        /// Available modifications: Add field, Remove field, Change field datatype. 
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Modify Table command.
+        /// </param>
+        ///<returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will Modify the Table in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Modify Table command.
+        /// </returns>
+        public static TQueryableCreate<Table> ModifyTable<Table>(this TQueryableSql<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<Table>()
+            {
+                SqlConnection = tQuery.SqlConnection,
+                SqlString = ModifySql(table, tQuery.SqlConnection)
+            };
+        }
+
+        /// <summary>
+        /// Creates a Table on the server database if not exists, based on the code table properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Create Table command.
+        /// </param>
+        public static void CreateTableIfNotExists<Table>(this TQueryable<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            tQuery.SqlConnection.Execute($"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};");
+        }
+
+        /// <summary>
+        /// Creates a Table on the server database if not exists, based on the code table properties.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Create Table command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Create Table command.
+        /// </returns>
+        public static TQueryableCreate<Table> CreateTableIfNotExists<Table>(this TQueryableSql<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<Table>()
+            {
+                SqlConnection = tQuery.SqlConnection,
+                SqlString = $"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};"
+            };
+        }
+
+        /// <summary>
+        /// Removes a Table from the server database.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Drop Table command.
+        /// </param>
+        public static void DropTable<Table>(this TQueryable<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            tQuery.SqlConnection.Execute($"DROP TABLE {table.Name}");
+        }
+
+        /// <summary>
+        /// Removes a Table from the server database.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Drop Table command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Drop Table command.
+        /// </returns>
+        public static TQueryableCreate<Table> DropTable<Table>(this TQueryableSql<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<Table>()
+            {
+                SqlConnection = tQuery.SqlConnection,
+                SqlString = $"DROP TABLE {table.Name}"
+            };
+        }
+
+        /// <summary>
+        /// Removes a Table from the server database if exists.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Drop Table command.
+        /// </param>
+        public static int DropTableIfExists<Table>(this TQueryable<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return tQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {table.Name}");
+        }
+
+        /// <summary>
+        /// Removes a Table from the server database if exists.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryableSql{T}"/> to perform the Drop Table command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Drop Table command.
+        /// </returns>
+        public static TQueryableCreate<Table> DropTableIfExists<Table>(this TQueryableSql<Table> tQuery)
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            return new TQueryableCreate<Table>()
+            {
+                SqlConnection = tQuery.SqlConnection,
+                SqlString = $"DROP TABLE IF EXISTS {table.Name}"
+            };
+        }
+
+        internal static string InsertQueryBuilder<Table>(this TQueryable<Table> tQuery)
+        {
+
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            var props = table.GetProperties().ToList();
+            StringBuilder columns = new StringBuilder();
+            StringBuilder values = new StringBuilder();
+            foreach (PropertyInfo field in props)
+            {
+                columns.Append($"{field.Name}, ");
+                values.Append($"@{field.Name}, ");
+            }
+
+            string insertQuery = $"({ columns.ToString().TrimEnd(',', ' ')}) VALUES ({ values.ToString().TrimEnd(',', ' ')}) ";
+            return insertQuery;
+        }
+        internal static string UpdateTableFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {
             var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
             var props = table.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add($"[T].[{field.Name}] = [Temp].[{field.Name}]"); }
-            return new TQueryableCreate<Table>()
-            {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"UPDATE T SET {fields.Join(", ")} FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];"
-            };
+            return $"UPDATE T SET {fields.Join(", ")} FROM [{table.Name}] T INNER JOIN [#{table.Name}Temp] Temp ON [T].[{keyColumnName}] = [Temp].[{keyColumnName}]; DROP TABLE [#{table.Name}Temp];";
+        }
+        internal static string InsertFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
+        {
+            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
+            var props = table.GetProperties().ToList();
+            List<string> fields = new List<string>();
+            foreach (PropertyInfo field in props) { fields.Add($"[T].[{field.Name}]"); }
+            return $"INSERT INTO [{table.Name}] OUTPUT INSERTED.{keyColumnName} SELECT {fields.Join(", ")} FROM [#{table.Name}Temp] T; DROP TABLE [#{table.Name}Temp]; ";
         }
         internal static TQueryableCreate<Table> DeleteRecordsFromTempSql<Table>(this TQueryable<Table> tQuery, string keyColumnName = "Id")
         {
@@ -850,64 +1423,6 @@ namespace Dapper.TQuery
                 SqlString = $"CREATE TABLE #{table.Name}Temp ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});"
             };
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static int CreateTableIfNotExists<Table>(this TQueryable<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return tQuery.SqlConnection.Execute($"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static TQueryableCreate<Table> CreateTableIfNotExists<Table>(this TQueryableSql<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<Table>()
-            {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"IF OBJECT_ID('{table.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(table)};"
-            };
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static int DropTable<Table>(this TQueryable<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return tQuery.SqlConnection.Execute($"DROP TABLE {table.Name}");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static TQueryableCreate<Table> DropTable<Table>(this TQueryableSql<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<Table>()
-            {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"DROP TABLE {table.Name}"
-            };
-        }
-
         internal static TQueryableCreate<Table> DropTable<Table>(this SqlConnection sqlConnection, string table)
         {
             return new TQueryableCreate<Table>()
@@ -916,35 +1431,6 @@ namespace Dapper.TQuery
                 SqlString = $"DROP TABLE {table}"
             };
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static int DropTableIfExists<Table>(this TQueryable<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return tQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {table.Name}");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery"></param>
-        /// <returns></returns>
-        public static TQueryableCreate<Table> DropTableIfExists<Table>(this TQueryableSql<Table> tQuery)
-        {
-            var table = tQuery.EmptyQuery.GetType().GenericTypeArguments[0];
-            return new TQueryableCreate<Table>()
-            {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"DROP TABLE IF EXISTS {table.Name}"
-            };
-        }
-
         private static string CreateSql(this Type type)
         {
             var table = type.Name;
@@ -973,11 +1459,46 @@ namespace Dapper.TQuery
             }
             return $"CREATE TABLE {table} ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});{Environment.NewLine}";
         }
+        private static string ModifySql(this Type type, SqlConnection sqlConnection)
+        {
+            var sqlCommands = new List<string>();
+            var addColums = new List<string>();
+            var dropColums = new List<string>();
+
+            sqlConnection.Open();
+            var dtCols = sqlConnection.GetSchema("Columns", new[] { sqlConnection.Database, null, type.Name });
+            sqlConnection.Close();
+            var typeProps = type.GetProperties().ToList();
+            var tableProps = new Dictionary<string, Type>();
+            foreach (DataRow field in dtCols.Rows)
+            {
+                var serverType = ExpressionToSQLExtensions.GetDNetType((string)field[7]);
+                var typeProp = typeProps.FirstOrDefault(x => x.Name == (string)field[3]);
+                tableProps.Add((string)field[3], serverType);
+                //if field not found in code table
+                if (typeProp != null)
+                    dropColums.Add(typeProp.Name);
+                //if datatype in code table is different
+                if (typeProp.PropertyType != serverType)
+                    sqlCommands.Add($"ALTER TABLE {type.Name}{Environment.NewLine}ALTER COLUMN {(string)field[3]} {typeProp.PropertyType.ToSqlDbTypeInternal()};");
+            }
+            foreach (PropertyInfo property in typeProps)
+            {
+                //if field added in code
+                if (tableProps.FirstOrDefault(x => x.Key == property.Name).Key == null)
+                    addColums.Add($"{property.Name} {property.PropertyType.ToSqlDbTypeInternal()}");
+            }
+            if (addColums.Any())
+                sqlCommands.Add($"ALTER TABLE {type.Name}{Environment.NewLine} ADD {addColums.Join(", ")};");
+            if (dropColums.Any())
+                sqlCommands.Add($"ALTER TABLE {type.Name}{Environment.NewLine} DROP {dropColums.Join(", ")};");
+
+            return sqlCommands.Join(Environment.NewLine);
+        }
         private static string CreateIfNotExistsSql(this Type type)
         {
             return $"IF OBJECT_ID('{type.Name}', 'U') IS NULL {Environment.NewLine}{CreateSql(type)};";
         }
-
         private static string DropSql(this Type type)
         {
             var table = type.Name;
@@ -988,16 +1509,16 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Creates all Tables on the server database, based on the code classes with [Table] attribute.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static int CreateAllTables(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to perform the Create All Tables command.
+        /// </param>
+        public static void CreateAllTables(this TQueryDatabase tQuery)
         {
             List<Type> types = new List<Type>();
-            var hgy = Assembly
-            .GetEntryAssembly().GetName().Name;
-            Console.WriteLine(hgy);
+            //var hgy = Assembly.GetEntryAssembly().GetName().Name;Console.WriteLine(hgy);
             foreach (Type type in Assembly
             .GetEntryAssembly().GetTypes())
             {
@@ -1005,25 +1526,26 @@ namespace Dapper.TQuery
                     types.Add(type);
             }
 
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
             foreach (var t in types)
             {
-                query.SqlString += t.CreateSql() + Environment.NewLine;
+                tQuery.SqlString += t.CreateSql() + Environment.NewLine;
             }
-            return sqlConnection.Execute(query.SqlString);
+            tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Creates all Tables on the server database, based on the code classes with [Table] attribute.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static int CreateAllTablesIfNotExists(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabaseSql"/> to perform the Create All Tables command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryDatabaseSql"/> instance, which the SQL command will create all Tables on the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
+        /// </returns>
+        public static TQueryDatabaseSql CreateAllTables(this TQueryDatabaseSql tQuery)
         {
             List<Type> types = new List<Type>();
-            var hgy = Assembly
-            .GetEntryAssembly().GetName().Name;
-            Console.WriteLine(hgy);
             foreach (Type type in Assembly
             .GetEntryAssembly().GetTypes())
             {
@@ -1031,20 +1553,71 @@ namespace Dapper.TQuery
                     types.Add(type);
             }
 
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
             foreach (var t in types)
             {
-                query.SqlString += t.CreateIfNotExistsSql() + Environment.NewLine;
+                tQuery.SqlString += t.CreateSql() + Environment.NewLine;
             }
-            return sqlConnection.Execute(query.SqlString);
+            return tQuery;
         }
 
         /// <summary>
-        /// 
+        /// Checks each table if exists on the database, and creates the non-exists Tables on the server database, based on the code classes with [Table] attribute.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static int DropAllTables(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to perform the Create All Tables command.
+        /// </param>
+        public static void CreateAllTablesIfNotExists(this TQueryDatabase tQuery)
+        {
+            List<Type> types = new List<Type>();
+            foreach (Type type in Assembly
+            .GetEntryAssembly().GetTypes())
+            {
+                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
+                    types.Add(type);
+            }
+
+            foreach (var t in types)
+            {
+                tQuery.SqlString += t.CreateIfNotExistsSql() + Environment.NewLine;
+            }
+            tQuery.SqlConnection.Execute(tQuery.SqlString);
+        }
+
+        /// <summary>
+        /// Checks each table if exists on the database, and creates the non-exists Tables on the server database, based on the code classes with [Table] attribute.
+        /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
+        /// </summary>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabaseSql"/> to perform the Create All Tables command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryDatabaseSql"/> instance, which the SQL command will create all non-exists Tables on the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
+        /// </returns>
+        public static TQueryDatabaseSql CreateAllTablesIfNotExists(this TQueryDatabaseSql tQuery)
+        {
+            List<Type> types = new List<Type>();
+            foreach (Type type in Assembly
+            .GetEntryAssembly().GetTypes())
+            {
+                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
+                    types.Add(type);
+            }
+
+            foreach (var t in types)
+            {
+                tQuery.SqlString += t.CreateIfNotExistsSql() + Environment.NewLine;
+            }
+            return tQuery;
+        }
+
+        /// <summary>
+        /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
+        /// </summary>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to perform the Drop All Tables command.
+        /// </param>
+        public static int DropAllTables(this TQueryDatabase tQuery)
         {
             List<Type> types = new List<Type>();
 
@@ -1055,75 +1628,23 @@ namespace Dapper.TQuery
                     types.Add(type);
             }
 
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
             foreach (var t in types)
             {
-                query.SqlString += t.DropSql() + Environment.NewLine;
+                tQuery.SqlString += t.DropSql() + Environment.NewLine;
             }
-            query.SqlConnection = sqlConnection;
-            return sqlConnection.Execute(query.SqlString);
+            return tQuery.SqlConnection.Execute(tQuery.SqlString);
         }
 
         /// <summary>
-        /// 
+        /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static TQueryableDatabase CreateAllTablesSql(this SqlConnection sqlConnection)
-        {
-            List<Type> types = new List<Type>();
-            var hgy = Assembly
-            .GetEntryAssembly().GetName().Name;
-            Console.WriteLine(hgy);
-            foreach (Type type in Assembly
-            .GetEntryAssembly().GetTypes())
-            {
-                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
-                    types.Add(type);
-            }
-
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
-            foreach (var t in types)
-            {
-                query.SqlString += t.CreateSql() + Environment.NewLine;
-            }
-            query.SqlConnection = sqlConnection;
-            return query;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static TQueryableDatabase CreateAllTablesIfNotExistsSql(this SqlConnection sqlConnection)
-        {
-            List<Type> types = new List<Type>();
-            var hgy = Assembly
-            .GetEntryAssembly().GetName().Name;
-            Console.WriteLine(hgy);
-            foreach (Type type in Assembly
-            .GetEntryAssembly().GetTypes())
-            {
-                if (type.GetCustomAttributes(typeof(TableAttribute), true).Length > 0)
-                    types.Add(type);
-            }
-
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
-            foreach (var t in types)
-            {
-                query.SqlString += t.CreateIfNotExistsSql() + Environment.NewLine;
-            }
-            query.SqlConnection = sqlConnection;
-            return query;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static TQueryableDatabase DropAllTablesSql(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to perform the Drop All Tables command.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Dapper.TQuery.TQueryDatabaseSql"/> instance, which the SQL command will remove all Tables on the database, and <see cref="Dapper.TQuery.TQueryExecute{T}.Execute"/> will execute the Drop All Tables command.
+        /// </returns>
+        public static TQueryDatabaseSql DropAllTables(this TQueryDatabaseSql tQuery)
         {
             List<Type> types = new List<Type>();
 
@@ -1134,32 +1655,34 @@ namespace Dapper.TQuery
                     types.Add(type);
             }
 
-            TQueryableDatabase query = new TQueryableDatabase() { SqlConnection = sqlConnection };
             foreach (var t in types)
             {
-                query.SqlString += t.DropSql() + Environment.NewLine;
+                tQuery.SqlString += t.DropSql() + Environment.NewLine;
             }
-            query.SqlConnection = sqlConnection;
-            return query;
+            return tQuery;
         }
 
         /// <summary>
-        /// 
+        /// Returns a list of all table defenitions from the server database.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static Dictionary<string, object> GetAllDbTablesType(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to get all database tables and their fields.
+        /// </param>
+        /// <returns>
+        /// An <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> which the Key is the table name, and the Value is an Dynamic Class as an <see cref="System.Dynamic.DynamicObject"/> including the table defenition, fields, and attributes. 
+        /// </returns>
+        public static Dictionary<string, object> GetAllServerDbTablesType(this TQueryDatabase tQuery)
         {
-            sqlConnection.Open();
-            DataTable t = sqlConnection.GetSchema("Tables");
-            sqlConnection.Close();
+            tQuery.SqlConnection.Open();
+            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
+            tQuery.SqlConnection.Close();
             var tables = new Dictionary<string, object>();
             foreach (DataRow row in t.Rows)
             {
                 string table = (string)row[2];
-                sqlConnection.Open();
-                var dtCols = sqlConnection.GetSchema("Columns", new[] { sqlConnection.Database, null, table });
-                sqlConnection.Close();
+                tQuery.SqlConnection.Open();
+                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
+                tQuery.SqlConnection.Close();
                 var fields = new List<Field>();
                 foreach (DataRow field in dtCols.Rows)
                 {
@@ -1172,16 +1695,21 @@ namespace Dapper.TQuery
         }
 
         /// <summary>
-        /// 
+        /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static bool IsEqualServerDbToCodeDb(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to compare the server database with all tables on the code classes.  
+        /// </param>
+        /// <returns>
+        /// True if all tables, fields, and properties on the server database matches the code classes with [Table] attribute. Otherwise, returns false.
+        /// </returns>
+        public static bool IsEqualServerDbToCodeDb(this TQueryDatabase tQuery)
         {
-            sqlConnection.Open();
-            DataTable t = sqlConnection.GetSchema("Tables");
-            sqlConnection.Close();
+            tQuery.SqlConnection.Open();
+            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
+            tQuery.SqlConnection.Close();
             var types = new List<Type>();
+            var tables = new List<string>();
             foreach (Type type in Assembly
             .GetExecutingAssembly().GetTypes())
             {
@@ -1193,35 +1721,50 @@ namespace Dapper.TQuery
             foreach (DataRow row in t.Rows)
             {
                 string table = (string)row[2];
-                sqlConnection.Open();
-                var dtCols = sqlConnection.GetSchema("Columns", new[] { sqlConnection.Database, null, table });
-                sqlConnection.Close();
-                var props = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
+                tables.Add(table);
+                tQuery.SqlConnection.Open();
+                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
+                tQuery.SqlConnection.Close();
+                var typeProps = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
+                var tableProps = new Dictionary<string, Type>();
                 foreach (DataRow field in dtCols.Rows)
                 {
-                    var classProp = props.FirstOrDefault(x => x.Name == (string)field[3]);
-                    var isEqual = classProp != null && classProp.PropertyType == ExpressionToSQLExtensions.GetDNetType((string)field[7]);
-                    if (!isEqual)
-                    {
+                    var serverType = ExpressionToSQLExtensions.GetDNetType((string)field[7]);
+                    var typeProp = typeProps.FirstOrDefault(x => x.Name == (string)field[3]);
+                    tableProps.Add((string)field[3], serverType);
+                    bool isEqual = typeProp == null || typeProp.PropertyType != serverType;
+                    if (!isEqual) return false;
+                }
+                foreach (PropertyInfo property in typeProps)
+                {
+                    if (tableProps.FirstOrDefault(x => x.Key == property.Name).Key == null)
                         return false;
-                    }
                 }
             }
-
+            foreach (Type type in types)
+            {
+                if (tables.Where(x => x == type.Name) == null)
+                    return false;
+            }
             return true;
         }
 
         /// <summary>
-        /// 
+        /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
-        /// <param name="sqlConnection"></param>
-        /// <returns></returns>
-        public static List<CompareDb> GetDiffServerDbToCodeDb(this SqlConnection sqlConnection)
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryDatabase"/> to compare the server database with all tables on the code classes.  
+        /// </param>
+        /// <returns>
+        /// An list of <see cref="Dapper.TQuery.TQueryExtensions.CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
+        /// </returns>
+        public static List<CompareDb> GetDiffServerDbToCodeDb(this TQueryDatabase tQuery)
         {
-            sqlConnection.Open();
-            DataTable t = sqlConnection.GetSchema("Tables");
-            sqlConnection.Close();
+            tQuery.SqlConnection.Open();
+            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
+            tQuery.SqlConnection.Close();
             var types = new List<Type>();
+            var tables = new List<string>();
             foreach (Type type in Assembly
             .GetExecutingAssembly().GetTypes())
             {
@@ -1234,27 +1777,73 @@ namespace Dapper.TQuery
             foreach (DataRow row in t.Rows)
             {
                 string table = (string)row[2];
-                sqlConnection.Open();
-                var dtCols = sqlConnection.GetSchema("Columns", new[] { sqlConnection.Database, null, table });
-                sqlConnection.Close();
-                var props = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
+                tables.Add(table);
+                tQuery.SqlConnection.Open();
+                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
+                tQuery.SqlConnection.Close();
+                var typeProps = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
+                var tableProps = new Dictionary<string, Type>();
                 foreach (DataRow field in dtCols.Rows)
                 {
                     var serverType = ExpressionToSQLExtensions.GetDNetType((string)field[7]);
-                    var classProp = props.FirstOrDefault(x => x.Name == (string)field[3]);
-                    var isEqual = classProp != null && classProp.PropertyType == serverType;
-                    if (!isEqual)
-                    {
-                        var namedesc = (string)field[3] == classProp.Name ? $"Field name '{(string)field[3]}' from server is different from '{classProp.Name}'" : null;
-                        var typedesc = serverType == classProp.PropertyType ? $"Field type '{serverType.FullName}' from server is different from '{classProp.PropertyType.FullName}'" : null;
-                        diff.Add(new CompareDb(table, (string)field[3], serverType,
-                        classProp.Name, classProp.PropertyType, namedesc == null ? typedesc : typedesc == null ? namedesc : $"{namedesc} AND {typedesc}"));
-                    }
+                    var typeProp = typeProps.FirstOrDefault(x => x.Name == (string)field[3]);
+                    tableProps.Add((string)field[3], serverType);
+                    string diffDesc = typeProp == null ? $"Field name '{(string)field[3]}' from server cannot be found in code table" :
+                    typeProp.PropertyType != serverType ? $"Field type '{serverType.FullName}' from server is different from '{typeProp.PropertyType.FullName}'" : null;
+                    if (!String.IsNullOrEmpty(diffDesc))
+                        diff.Add(new CompareDb(table, (string)field[3], serverType, typeProp?.Name, typeProp?.PropertyType, diffDesc));
                 }
-            }
+                foreach (PropertyInfo property in typeProps)
+                {
+                    if (tableProps.FirstOrDefault(x => x.Key == property.Name).Key == null)
+                        diff.Add(new CompareDb(table, null, null, property.Name, property.PropertyType, $"Field name '{property.Name}' from code table cannot be found in server table"));
+                }
 
+            }
+            foreach (Type type in types)
+            {
+                if (tables.Where(x => x == type.Name) == null)
+                    diff.Add(new CompareDb(type.Name, null, null, null, null, $"Table name '{type.Name}' from code table cannot be found in server database"));
+            }
             return diff;
         }
+
+        /// <summary>
+        /// Compares the server table and the code class with that table name, checks each field and their properties.
+        /// </summary>
+        /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
+        /// <param name="tQuery">
+        /// An <see cref="Dapper.TQuery.TQueryable{T}"/> to perform the Drop Table command.
+        /// </param>
+        /// <returns>
+        /// An list of <see cref="Dapper.TQuery.TQueryExtensions.CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
+        /// </returns>
+        public static List<CompareDb> GetDiffServerTableToCodeTable<Table>(this TQueryable<Table> tQuery)
+        {
+            var diff = new List<CompareDb>();
+            tQuery.SqlConnection.Open();
+            var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, typeof(Table).Name });
+            tQuery.SqlConnection.Close();
+            var typeProps = typeof(Table).GetProperties().ToList();
+            var tableProps = new Dictionary<string, Type>();
+            foreach (DataRow field in dtCols.Rows)
+            {
+                var serverType = ExpressionToSQLExtensions.GetDNetType((string)field[7]);
+                var typeProp = typeProps.FirstOrDefault(x => x.Name == (string)field[3]);
+                tableProps.Add((string)field[3], serverType);
+                string diffDesc = typeProp == null ? $"Field name '{(string)field[3]}' from server cannot be found in code table" :
+                typeProp.PropertyType != serverType ? $"Field type '{serverType.FullName}' from server is different from '{typeProp.PropertyType.FullName}'" : null;
+                if (!String.IsNullOrEmpty(diffDesc))
+                    diff.Add(new CompareDb(typeof(Table).Name, (string)field[3], serverType, typeProp?.Name, typeProp?.PropertyType, diffDesc));
+            }
+            foreach (PropertyInfo property in typeProps)
+            {
+                if (tableProps.FirstOrDefault(x => x.Key == property.Name).Key == null)
+                    diff.Add(new CompareDb(typeof(Table).Name, null, null, property.Name, property.PropertyType, $"Field name '{property.Name}' from code table cannot be found in server table"));
+            }
+            return diff;
+        }
+
         public class CompareDb
         {
             public string TableName { get; set; }

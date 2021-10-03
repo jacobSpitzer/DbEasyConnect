@@ -121,21 +121,57 @@ namespace Dapper.TQuery.Development
             return SqlConnection.ExecuteScalarAsync<bool>(SqlString);
         }
     }
-    public class TQueryableDatabase
+
+    public class TQueryDatabase
     {
         internal SqlConnection SqlConnection { get; set; }
         internal string SqlString { get; set; }
-
-        public int Execute()
+        internal SqlDialect SqlDialect { get; set; }
+        internal TQueryDatabase(string ConnectionString, SqlDialect sqlDialect)
         {
-            return SqlConnection.Execute(SqlString);
+            this.SqlConnection = new SqlConnection(ConnectionString);
+            this.SqlDialect = sqlDialect;
+        }
+        internal TQueryDatabase(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = sqlConnection;
+            this.SqlDialect = sqlDialect;
+        }
+        public void Execute()
+        {
+            SqlConnection.Execute(SqlString);
         }
         public Task<int> ExecuteAsync()
         {
             return SqlConnection.ExecuteAsync(SqlString);
         }
-
     }
+    public class TQueryDatabaseSql
+    {
+        internal SqlConnection SqlConnection { get; set; }
+        internal string SqlString { get; set; }
+        internal SqlDialect SqlDialect { get; set; }
+        internal TQueryDatabaseSql(string ConnectionString, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = new SqlConnection(ConnectionString);
+            this.SqlDialect = sqlDialect;
+        }
+        internal TQueryDatabaseSql(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        {
+            this.SqlConnection = sqlConnection;
+            this.SqlDialect = sqlDialect;
+        }
+        public void Execute()
+        {
+            SqlConnection.Execute(SqlString);
+        }
+        public Task<int> ExecuteAsync()
+        {
+            return SqlConnection.ExecuteAsync(SqlString);
+        }
+    }
+
+
 
     /// <summary>
     /// SQL dialect enumeration
