@@ -46,8 +46,10 @@ Here are a list for all known methods that will work only with MS-SQL SERVER and
 Method       | Limit         | Explanation
 ------------ | ------------- | ------------------------------
 CreateTable | limit | exp
+This section will be updated soon...
+
 #### Coming Methods
-GroupBy, Add/Modify/Delete Column,  
+GroupBy, Count, Sum, Max, Min, Add/Modify/Delete Column, and more  
 #### Support to specifieng a table name different than the class name
 
 ## Installation
@@ -84,8 +86,9 @@ and then:
 // Create a SqlConnection
 var con = new SqlConnection("Server=YOUR.SERVER.COM; Database=DATABASE_NAME; User ID=USER_ID;Password=*******; Trusted_Connection=False; MultipleActiveResultSets=True");
 // Get all records from the Sample Table
-con.TQuery<Sample>().ToList();          
+con.TQuery<Sample>().GetAll();          
 ```
+[Check out the 'Start' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryStartExtensions)
 
 #### How to write a Table Class
 
@@ -101,32 +104,35 @@ Please note: currently it doesn't matter what table name you specify in the Tabl
 
 ##### Data Types
 
+This section will be updated soon...
 
 ##### Data Annotations Attributes
 
 You can use some attributes above each field to specify more properties on the field:
 
-Attribute | Sql Property | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
-----------|--------------|---------------|-------|--------|------------|---------|
-[Required] | NOT NULL |
+Attribute | Supported | Sql Property | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
+----------|-----------|---------------|-------|--------|------------|---------|
+[Required] | NOT NULL | :heavy_check_mark: |
 [Index] | |
 [Index(IsUnique=true)] | UNIQUE
-[Key] | PRIMARY KEY | 
+[Key] | PRIMARY KEY | :heavy_check_mark: |
 [ForeignKey("TableName")] | FOREIGN KEY |
-[AutoIncrement] | 
+[AutoIncrement] | Identity(1,1) | :heavy_check_mark: |
 [DefaultValue(true)] | DEFAULT |
 [StringLength(50)] | LENGTH |
 
-#### Create / Modify Tables
+#### Create / Modify Tables & Database, Compare / Migrate Code Tables VS Server Database
 
-#### Code Tables VS Server Database
+[Check out the 'Table & Database Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryTableExtensions)
 
 #### Supported Linq Methods
 
-#### Get, Find, Insert, Update, Delete
+[Check out the 'Linq Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryLinqExtensions)
 
-#### InsertList, UpdateList, DeleteList
+#### Get, Find, Insert, Update, Delete, InsertList, UpdateList, DeleteList
 
-#### Join Multiple Tables
+[Check out the 'Crud Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryCrudExtensions)
 
-#### Read / Update generated SQL commands
+#### Full Library Reference
+
+[Check out the wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/Home)
