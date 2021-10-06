@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Dapper.TQuery
 {
-    public static class Evaluator
+    internal static class Evaluator
     {
         /// <summary>
         /// Performs evaluation and replacement of independent sub-trees

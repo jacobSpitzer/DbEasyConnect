@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Dapper.TQuery
 {
-    public static class ExpressionToSQLExtensions
+    internal static class ExpressionToSQLExtensions
     {
 
         public static bool CanConvertToSqlDbType(this Type type) => type.ToSqlDbTypeInternal().HasValue;

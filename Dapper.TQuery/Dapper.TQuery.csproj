@@ -21,12 +21,24 @@ The current version is adding XML method documentation comments, fixing methods,
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/jacobSpitzer/Dapper.TQuery</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!--<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <DocumentationFile>obj\Debug\netstandard2.1\Dapper.TQuery.xml</DocumentationFile>
+	  <DefaultDocumentationAssemblyPageName>Home</DefaultDocumentationAssemblyPageName>
     <ApplicationIcon>C:\Users\User\Downloads\QuickAppsIco.ico</ApplicationIcon>
+    <DefaultDocumentationFileNameMode>NameAndMd5Mix</DefaultDocumentationFileNameMode>
+	  <DefaultDocumentationRemoveFileExtensionFromLinks>True</DefaultDocumentationRemoveFileExtensionFromLinks>
+	  <DefaultDocumentationGeneratedAccessModifiers>Public</DefaultDocumentationGeneratedAccessModifiers>
+	  <DefaultDocumentationIgnoreLineBreak>True</DefaultDocumentationIgnoreLineBreak>
+	   <DefaultDocumentationFolder>Dapper.TQuery.wiki\api</DefaultDocumentationFolder>
+    <DefaultDocumentationGeneratedPages>Classes, Types, Methods</DefaultDocumentationGeneratedPages>-->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.90" />
+    <!--<PackageReference Include="DefaultDocumentation" Version="0.7.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>-->
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>

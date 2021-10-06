@@ -10,7 +10,7 @@ using System.Data.SqlClient;
 
 namespace Dapper.TQuery
 {
-    public class ExpressionToSQL : ExpressionVisitor
+    internal class ExpressionToSQL : ExpressionVisitor
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<string> _groupBy = new List<string>();

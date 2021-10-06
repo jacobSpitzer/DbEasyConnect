@@ -6,20 +6,45 @@ using System.Threading.Tasks;
 
 namespace Dapper.TQuery.Development
 {
-    internal class AutoIncrementAttribute : Attribute
-    {
-    }
-
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public abstract class TQuery<T>
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         internal SqlConnection SqlConnection { get; set; }
         internal IQueryable<T> EmptyQuery { get; set; }
         internal string SqlString { get; set; }
         internal SqlDialect SqlDialect { get; set; }
     }
-    public abstract class TQueryGet<T>: TQuery<T>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public abstract class TQueryGet<T> : TQuery<T>
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
-        public List<T>? ToList()
+        /// <summary>
+        /// Executes a query, returning an IEnumerable object with the data typed as T.
+        /// </summary>
+        /// <returns>
+        /// A sequence of data of the supplied table type; an instance
+        /// is created per row, and a direct column-name===member-name mapping is assumed
+        /// (case insensitive).
+        /// </returns>
+        public IEnumerable<T> AsEnumerable()
+        {
+            if (String.IsNullOrEmpty(SqlString))
+            {
+                EmptyQuery = Enumerable.Empty<T>().AsQueryable();
+                SqlString = new ExpressionToSQL(EmptyQuery);
+            }
+            return SqlConnection.Query<T>(SqlString);
+        }
+        /// <summary>
+        /// Executes a query, returning an List object with the data typed as T.
+        /// </summary>
+        /// <returns>
+        /// A sequence of data of the supplied table type; an instance
+        /// is created per row, and a direct column-name===member-name mapping is assumed
+        /// (case insensitive).
+        /// </returns>
+        public IList<T> ToList()
         {
             if (String.IsNullOrEmpty(SqlString))
             {
@@ -28,6 +53,14 @@ namespace Dapper.TQuery.Development
             }
             return SqlConnection.Query<T>(SqlString)?.ToList();
         }
+        /// <summary>
+        /// Execute a query asynchronously using Task, returning an List object with the data typed as T.
+        /// </summary>
+        /// <returns>
+        /// A sequence of data of the supplied table type; an instance
+        /// is created per row, and a direct column-name===member-name mapping is assumed
+        /// (case insensitive).
+        /// </returns>
         public Task<IEnumerable<T>> ToListAsync()
         {
             if (String.IsNullOrEmpty(SqlString))
@@ -37,27 +70,52 @@ namespace Dapper.TQuery.Development
             }
             return SqlConnection.QueryAsync<T>(SqlString);
         }
+        /// <summary>
+        /// Returns the TQuery generated Sql command.<br/>
+        /// To modify the Sql command manually, use the <see cref="TQueryExtensions.TQueryExtended"/> method,
+        /// and then use the <see cref="TQueryExtensions.ModifySqlString"/> method.
+        /// </summary>
+        /// <returns> TQuery generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
         }
     }
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public abstract class TQueryExecute<T> : TQuery<T>
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
+        /// <summary>
+        /// Execute TQuery SQL command.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int Execute()
         {
             return SqlConnection.Execute(SqlString);
         }
+        /// <summary>
+        /// Execute TQuery SQL command asynchronously using Task.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public Task<int> ExecuteAsync()
         {
             return SqlConnection.ExecuteAsync(SqlString);
         }
+        /// <summary>
+        /// Returns the TQuery generated Sql command.<br/>
+        /// To modify the Sql command manually, use the <see cref="TQueryExtensions.TQueryExtended"/> method,
+        /// and then use the <see cref="TQueryExtensions.ModifySqlString"/> or <see cref="TQueryExtensions.ReplaceInSqlString"/> method.
+        /// </summary>
+        /// <returns> TQuery generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
         }
     }
-    
+    /// <summary>
+    /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the Database with <see cref="Dapper.TQuery"/> method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryable<T> : TQueryGet<T>
     {
         internal TQueryable(string ConnectionString, SqlDialect sqlDialect)
@@ -69,9 +127,9 @@ namespace Dapper.TQuery.Development
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
         }
-        internal TQueryable(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        internal TQueryable(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
-            this.SqlConnection = sqlConnection;
+            this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
             if (EmptyQuery == null)
             {
@@ -79,9 +137,13 @@ namespace Dapper.TQuery.Development
             }
         }
     }
-    public class TQueryableSql<T> : TQueryGet<T>
+    /// <summary>
+    /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the Database with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class TQueryableExtended<T> : TQueryGet<T>
     {
-        internal TQueryableSql(string ConnectionString, SqlDialect sqlDialect)
+        internal TQueryableExtended(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             if (EmptyQuery == null)
@@ -89,39 +151,67 @@ namespace Dapper.TQuery.Development
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
         }
-        internal TQueryableSql(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        internal TQueryableExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
-            this.SqlConnection = sqlConnection;
+            this.SqlConnection = SqlConnection;
             if (EmptyQuery == null)
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
         }
     }
-    
+    /// <summary>
+    /// An <see cref="TQueryableSelect{T}"/> instanse which will be used for the 'Select' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryableSelect<T> : TQueryGet<T> { }
-    public class TQueryableOrder<T> : TQueryGet<T> { } 
-    public class TQueryableFilter<T> : TQueryGet<T> { }
-    public class TQueryableGroup<T> : TQueryGet<T> { }
-    public class TQueryableJoin<T> : TQueryGet<T> { }
-    public class TQueryableJoin<T, TResult> : TQueryGet<T> { }
-    public class TQueryableSingle<T> : TQueryGet<T> { }
+    /// <summary>
+    /// An <see cref="TQueryableOrder{T}"/> instanse which will be used for the 'Order' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class TQueryableOrder<T> : TQueryGet<T> { }
+    /// <summary>
+    /// An <see cref="TQueryableUpdate{T}"/> instanse which will be used for the 'Update' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryableUpdate<T> : TQueryExecute<T> { }
+    /// <summary>
+    /// An <see cref="TQueryableDelete{T}"/> instanse which will be used for the 'Delete' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryableDelete<T> : TQueryExecute<T> { }
-    public class TQueryableInsert<T> : TQueryExecute<T> { }
+    /// <summary>
+    /// An <see cref="TQueryableCreate{T}"/> instanse which will be used for all 'Create/Modify/Delete Table' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryableCreate<T> : TQueryExecute<T> { }
+    /// <summary>
+    /// An <see cref="TQueryableBool{T}"/> instanse which will be used for the 'Boolean' method extensions.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TQueryableBool<T> : TQuery<T>
     {
+        /// <summary>
+        /// Execute TQuery SQL boolean command and returns true or false.
+        /// </summary>
+        /// <returns> True if the command result is true, otherwise returns false.</returns>
         public bool Execute()
         {
             return SqlConnection.ExecuteScalar<bool>(SqlString);
         }
+        /// <summary>
+        /// Execute TQuery SQL boolean command asynchronously using Task, and returns true or false.
+        /// </summary>
+        /// <returns> True if the command result is true, otherwise returns false.</returns>
         public Task<bool> ExecuteAsync()
         {
             return SqlConnection.ExecuteScalarAsync<bool>(SqlString);
         }
     }
-
+    /// <summary>
+    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with <see cref="Dapper.TQuery"/> method extensions.
+    /// <br/>Like create/drop all tables, get all table defenitions and compare with the code tables, and more.
+    /// </summary>
     public class TQueryDatabase
     {
         internal SqlConnection SqlConnection { get; set; }
@@ -132,39 +222,54 @@ namespace Dapper.TQuery.Development
             this.SqlConnection = new SqlConnection(ConnectionString);
             this.SqlDialect = sqlDialect;
         }
-        internal TQueryDatabase(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        internal TQueryDatabase(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
-            this.SqlConnection = sqlConnection;
+            this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
         }
+        /// <summary>
+        /// Execute TQuery SQL command.
+        /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
+        /// <summary>
+        /// Execute TQuery SQL command asynchronously using Task.
+        /// </summary>
         public Task<int> ExecuteAsync()
         {
             return SqlConnection.ExecuteAsync(SqlString);
         }
     }
-    public class TQueryDatabaseSql
+    /// <summary>
+    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with <see cref="Dapper.TQuery"/> method extensions, with some advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+    /// </summary>
+    public class TQueryDatabaseExtended
     {
         internal SqlConnection SqlConnection { get; set; }
         internal string SqlString { get; set; }
         internal SqlDialect SqlDialect { get; set; }
-        internal TQueryDatabaseSql(string ConnectionString, SqlDialect sqlDialect)
+        internal TQueryDatabaseExtended(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             this.SqlDialect = sqlDialect;
         }
-        internal TQueryDatabaseSql(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        internal TQueryDatabaseExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
-            this.SqlConnection = sqlConnection;
+            this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
         }
+        /// <summary>
+        /// Execute TQuery SQL command.
+        /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
+        /// <summary>
+        /// Execute TQuery SQL command asynchronously using Task.
+        /// </summary>
         public Task<int> ExecuteAsync()
         {
             return SqlConnection.ExecuteAsync(SqlString);
@@ -230,3 +335,4 @@ namespace Dapper.TQuery.Development
         FullJoin
     }
 }
+
