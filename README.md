@@ -110,16 +110,17 @@ This section will be updated soon...
 
 You can use some attributes above each field to specify more properties on the field:
 
-Attribute | Supported | Sql Property | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
-----------|-----------|---------------|-------|--------|------------|---------|
-[Required] | NOT NULL | :heavy_check_mark: |
+Attribute | Sql Property | Supported | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
+----------|--------------|-----------|---------------|-------|--------|------------|---------|
+[Required] | NOT NULL | :heavy_check_mark: | :heavy_check_mark: |
 [Index] | |
 [Index(IsUnique=true)] | UNIQUE
-[Key] | PRIMARY KEY | :heavy_check_mark: |
+[Key] | PRIMARY KEY | :heavy_check_mark: | :heavy_check_mark: |
 [ForeignKey("TableName")] | FOREIGN KEY |
-[AutoIncrement] | Identity(1,1) | :heavy_check_mark: |
+[AutoIncrement] | Identity(1,1) | :heavy_check_mark: | :heavy_check_mark: |
 [DefaultValue(true)] | DEFAULT |
 [StringLength(50)] | LENGTH |
+
 
 #### Create / Modify Tables & Database, Compare / Migrate Code Tables VS Server Database
 
