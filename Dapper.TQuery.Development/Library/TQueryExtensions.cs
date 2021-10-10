@@ -89,7 +89,7 @@ namespace Dapper.TQuery.Development
         /// An <see cref="TQueryDatabase"/> instanse which will be used to query and/or modify the Database with TQuery method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDb<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        public static TQueryDatabase TQueryDb(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
             TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
             return query;
@@ -111,7 +111,7 @@ namespace Dapper.TQuery.Development
         /// An <see cref="TQueryDatabase"/> instanse which will be used to query and/or modify the Database with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbExtended<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        public static TQueryDatabase TQueryDbExtended(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
             TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
             return query;
