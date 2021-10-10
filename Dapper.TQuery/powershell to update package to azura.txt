@@ -1,4 +1,5 @@
-C:\Users\User\source\repos\DapperQueryable\Dapper.TQuery\bin\Debug\nuget.exe push -Source "Dapper-TQuery" -ApiKey QuickApps Dapper.TQuery.0.2.1.nupkg
+cd C:\Users\User\source\repos\DapperQueryable\Dapper.TQuery\bin\Debug\
+C:\Users\User\source\repos\DapperQueryable\Dapper.TQuery\bin\Debug\nuget.exe push -Source "Dapper-TQuery" -ApiKey QuickApps Dapper.TQuery.0.3.6.nupkg
 
 Library description:
 Use Dapper 'Queryable' like 'Linq'.
