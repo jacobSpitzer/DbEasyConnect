@@ -14,8 +14,8 @@ namespace Dapper.TQuery
     /// </summary>
     public static class TQueryStartExtensions
     {
-         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
-       /// <summary>
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
         /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
@@ -80,7 +80,7 @@ namespace Dapper.TQuery
         /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDb<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        public static TQueryDatabase TQueryDb(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
             TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
             return query;
@@ -102,7 +102,7 @@ namespace Dapper.TQuery
         /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbExtended<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        public static TQueryDatabase TQueryDbExtended(this SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
         {
             TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
             return query;
@@ -141,6 +141,208 @@ namespace Dapper.TQuery
         {
             tQuery.SqlString = tQuery.SqlString.Replace(oldValue, newValue);
             return tQuery;
+        }
+
+    }
+
+    /// <summary>
+    /// The start point of using this library.
+    /// <br/>
+    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with TQuery method extensions.
+    /// Or <see cref="TQueryableExtended{T}"/> instanse, for more advanced options.
+    /// <br/>
+    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with TQuery method extensions.
+    /// Or <see cref="TQueryDatabaseExtended"/> instanse, for more advanced options.
+    /// </summary>
+    public static class TQueryStartMethods
+    {
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="sqlConnection">
+        /// The SqlConnection to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// </returns>
+        ///         
+        public static TQueryable<Table> TQueryInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryable<Table> query = new TQueryable<Table>(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="sqlConnection">
+        /// The SqlConnection to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        ///         
+        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="sqlConnection">
+        /// The SqlConnection to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// </returns>
+        ///         
+        public static TQueryDatabase TQueryDbInit(SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="sqlConnection">
+        /// The SqlConnection to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        ///         
+        public static TQueryDatabase TQueryDbExtendedInit(SqlConnection sqlConnection, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="connectionString">
+        /// The connection string to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// </returns>
+        ///         
+        public static TQueryable<Table> TQueryInit<Table>(string connectionString, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryable<Table> query = new TQueryable<Table>(connectionString, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// </summary>
+        /// <typeparam name="Table">
+        /// The type of the records of table class. need to be a class with the [Table("")] attribute.
+        /// </typeparam>
+        /// <param name="connectionString">
+        /// The connection string to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        ///         
+        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(string connectionString, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryableExtended<Table> query = new TQueryableExtended<Table>(connectionString, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The connection string to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// </returns>
+        ///         
+        public static TQueryDatabase TQueryDbInit(string connectionString, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(connectionString, sqlDialect);
+            return query;
+        }
+
+        //TODO add Exception for wrong type selection, type that does not have a Table attribute.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionString">
+        /// The connection string to be used to connect to the Server Database.
+        /// </param>
+        /// <param name="sqlDialect">
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </param>
+        /// <returns>
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// </returns>
+        ///         
+        public static TQueryDatabase TQueryDbExtendedInit(string connectionString, SqlDialect sqlDialect = SqlDialect.SqlServer)
+        {
+            TQueryDatabase query = new TQueryDatabase(connectionString, sqlDialect);
+            return query;
         }
 
     }
