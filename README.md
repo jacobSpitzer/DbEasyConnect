@@ -108,18 +108,33 @@ This section will be updated soon...
 
 ##### Data Annotations Attributes
 
-You can use some attributes above each field to specify more properties on the field:
+You can use most of the [Data Annotations](https://docs.microsoft.com/en-us/ef/ef6/modeling/code-first/data-annotations) attributes to specify more properties on the Table/Field as explained in the following table:
 
-Attribute | Sql Property | Supported | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
-----------|--------------|-----------|---------------|-------|--------|------------|---------|
+Attribute | Description | Example | Sql Property | Supported | MS-SQL SERVER | MySql | SqLite | PostgreSql | LocalDb
+----------|-------------|---------|--------------|-----------|---------------|-------|--------|------------|---------|
+Database Schema related Attributes 
+Table | name of the table and define the schema | `Table("TableName", Schema = "dbo")]` | TABLE NAME | :heavy_check_mark: | :heavy_check_mark: | 
+Column | name, data type, and order of the column | `[Column("Name", Order = 2, TypeName = "Varchar(100)")]` |
+Key | set field(s) as the table primary key | `[Key]` | PRIMARY KEY | :heavy_check_mark: | :heavy_check_mark: |
+Timestamp
+ConcurrencyCheck
+ForeignKey
+InverseProperty
+Index
+DatabaseGenerated
+ComplexType
+NotMapped
 [Required] | NOT NULL | :heavy_check_mark: | :heavy_check_mark: |
-[Index] | |
 [Index(IsUnique=true)] | UNIQUE
-[Key] | PRIMARY KEY | :heavy_check_mark: | :heavy_check_mark: |
 [ForeignKey("TableName")] | FOREIGN KEY |
 [AutoIncrement] | Identity(1,1) | :heavy_check_mark: | :heavy_check_mark: |
 [DefaultValue(true)] | DEFAULT |
 [StringLength(50)] | LENGTH |
+Validation Attributes
+Required
+MinLength
+MaxLength
+StringLength
 
 
 #### Create / Modify Tables & Database, Compare / Migrate Code Tables VS Server Database
