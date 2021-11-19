@@ -7,11 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
-using static Dapper.TQuery.FieldAttributes;
+using static Dapper.TQuery.Development.FieldAttributes;
+using System.Data.SqlTypes;
 
 namespace MyDapper.Tables
 {
-    abstract class Base
+    public abstract class Base
     {
         [Key]
         [AutoIncrement]
@@ -21,15 +22,37 @@ namespace MyDapper.Tables
         public DateTime UpdateDate { get; set; }
         public bool IsDelete { get; set; }
     }
-    
+
+    [Table("Client")]
+    public class Client
+    {
+        [AutoIncrement]
+        [Key]
+        [Order]
+        [MaxLength(10)]
+        public int ClientId { get; set; }
+        [Order]
+        public string? FirstName { get; set; }
+        [Order]
+        public string? LastName { get; set; }
+        [Order]
+        public DateTime DateOfBirth { get; set; }
+        [Order]
+        public Question Question { get; set; }
+        [Order]
+        public string? LastNamee { get; set; }
+        [Order]
+        public DateTime DateOfBirthh { get; set; }
+    }
+
     [Table("ForumUsers")]
-    class ForumUser: Base
+    public class ForumUser: Base
     {
         public string Username { get; set; }
         public int Role { get; set; }
         public int Status { get; set; }
     }
-    abstract class ForumBase : Base
+    public abstract class ForumBase : Base
     {
         public int UserId { get; set; }
         public string Body { get; set; }
@@ -39,7 +62,7 @@ namespace MyDapper.Tables
     }
     
     [Table("Questions")]
-    class Question : ForumBase
+    public class Question : ForumBase
     {
         public string Subject { get; set; }
         public string CensorBody { get; set; }

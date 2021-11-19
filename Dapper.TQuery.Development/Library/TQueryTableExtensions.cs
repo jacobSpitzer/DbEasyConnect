@@ -7,11 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using static Dapper.TQuery.FieldAttributes;
+using static Dapper.TQuery.Development.FieldAttributes;
 using System.Collections;
-using static Dapper.TQuery.TQueryExceptions;
+using static Dapper.TQuery.Development.TQueryExceptions;
 
-namespace Dapper.TQuery
+namespace Dapper.TQuery.Development
 {
     /// <summary>
     /// Handle table defenitions, create/modify/delete tables based on the code table classes, and compare between server database and code tables, and more.
@@ -265,8 +265,7 @@ namespace Dapper.TQuery
                         if (field.IsDefined(typeof(SubTypeAttribute)) && field.GetCustomAttribute<SubTypeAttribute>().IncludeParentName) fieldName += field.Name + "_";
                         getPropsNamesAndAttr(subProps, ref fields, ref constraints, ref fieldName);
                         continue;
-                    }
-                    else { throw new NotSupportedFieldTypeException(field); }
+                    } else { throw new NotSupportedFieldTypeException(field); }
                 }
                 var tableField = new TableField { };
                 //name of the field
@@ -279,13 +278,13 @@ namespace Dapper.TQuery
                 if (tableField.Name.ToLower() == "id" && fieldType.IsIntType() && TQueryDefaults.IdFieldIsKeyByDefault)
                 { tableField.PrimaryKey = true; tableField.AutoIncrement = true; }
                 //nullable?
-                if (field.IsDefined(typeof(RequiredAttribute)) || field.IsDefined(typeof(KeyAttribute)) ||
+                if (field.IsDefined(typeof(RequiredAttribute)) || field.IsDefined(typeof(KeyAttribute)) || 
                     fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>) && TQueryDefaults.SetNullablePropsInSqlToNull)
-                    tableField.Required = true;
+                        tableField.Required = true;
                 //other attributes
                 foreach (var attribute in field.GetCustomAttributes())
                 {
-                    switch (attribute.GetType().Name)
+                    switch (attribute.GetType().Name) 
                     {
                         case nameof(ColumnAttribute):
                             if (field.GetCustomAttribute<ColumnAttribute>()?.Order > 0)

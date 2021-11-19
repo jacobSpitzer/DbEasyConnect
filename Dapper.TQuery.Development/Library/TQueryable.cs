@@ -1,11 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Dapper.TQuery.Development
 {
+    public static class TQueryDefaults
+    {
+        /// <summary>
+        /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
+        /// these are all different databases that have their own slightly different SQL dialects. 
+        /// If no dialect was given, the default dialect <see cref="SqlDialect.SqlServer"/> will be used.
+        /// </summary>
+        public static SqlDialect SqlDialect { get; set; } = SqlDialect.SqlServer;
+        public static string Schema { get; set; } = "dbo";
+        public static bool AllowSubTypeAuto { get; set; } = true;
+        public static bool SetNullablePropsInSqlToNull { get; set; } = false;
+        public static bool IdFieldIsKeyByDefault { get; set; } = true;
+        public static bool PrimaryKeyIsAutoIncrementByDefault { get; set; } = true;
+
+    }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public abstract class TQuery<T>
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
@@ -14,6 +32,8 @@ namespace Dapper.TQuery.Development
         internal IQueryable<T> EmptyQuery { get; set; }
         internal string SqlString { get; set; }
         internal SqlDialect SqlDialect { get; set; }
+        internal string TableName { get; set; }
+        internal Type TableType { get; set; }
     }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public abstract class TQueryGet<T> : TQuery<T>
@@ -72,8 +92,8 @@ namespace Dapper.TQuery.Development
         }
         /// <summary>
         /// Returns the TQuery generated Sql command.<br/>
-        /// To modify the Sql command manually, use the <see cref="TQueryExtensions.TQueryExtended"/> method,
-        /// and then use the <see cref="TQueryExtensions.ModifySqlString"/> method.
+        /// To modify the Sql command manually, use the TQueryExtended method,
+        /// and then use the <see cref="TQueryStartExtensions.ModifySqlString{Table}(TQueryableExtended{Table}, string)"/> method.
         /// </summary>
         /// <returns> TQuery generated Sql command as a String.</returns>
         public string ToSqlString()
@@ -103,8 +123,8 @@ namespace Dapper.TQuery.Development
         }
         /// <summary>
         /// Returns the TQuery generated Sql command.<br/>
-        /// To modify the Sql command manually, use the <see cref="TQueryExtensions.TQueryExtended"/> method,
-        /// and then use the <see cref="TQueryExtensions.ModifySqlString"/> or <see cref="TQueryExtensions.ReplaceInSqlString"/> method.
+        /// To modify the Sql command manually, use the TQueryExtended method,
+        /// and then use the ModifySqlString or ReplaceInSqlString method.
         /// </summary>
         /// <returns> TQuery generated Sql command as a String.</returns>
         public string ToSqlString()
@@ -113,7 +133,7 @@ namespace Dapper.TQuery.Development
         }
     }
     /// <summary>
-    /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the Database with <see cref="Dapper.TQuery"/> method extensions.
+    /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the Database with Dapper.TQuery method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class TQueryable<T> : TQueryGet<T>
@@ -126,6 +146,14 @@ namespace Dapper.TQuery.Development
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
+            this.TableType = typeof(T);
+            this.TableName = typeof(T).Name + "s";
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            {
+                string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ? 
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                this.TableName = $"{schema}.{this.TableName}";
+            } else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name;}
         }
         internal TQueryable(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
@@ -135,8 +163,37 @@ namespace Dapper.TQuery.Development
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
+            this.TableType = typeof(T);
+            this.TableName = typeof(T).Name + "s";
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            {
+                string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                this.TableName = $"{schema}.{this.TableName}";
+            }
+            else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
     }
+    internal class TQueryable
+    {
+        internal SqlDialect SqlDialect { get; set; }
+        internal string TableName { get; set; }
+        internal Type TableType { get; set; }
+        internal TQueryable(Type type, SqlDialect sqlDialect)
+        {
+            this.SqlDialect = sqlDialect;
+            this.TableType = type;
+            this.TableName = type.Name + "s";
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            {
+                string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                this.TableName = $"{schema}.{this.TableName}";
+            }
+            else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
+        }
+    }
+
     /// <summary>
     /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the Database with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
     /// </summary>
@@ -150,6 +207,15 @@ namespace Dapper.TQuery.Development
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
+            this.TableType = typeof(T);
+            this.TableName = typeof(T).Name + "s";
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            {
+                string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                this.TableName = $"{schema}.{this.TableName}";
+            }
+            else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
         internal TQueryableExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
@@ -158,6 +224,15 @@ namespace Dapper.TQuery.Development
             {
                 EmptyQuery = Enumerable.Empty<T>().AsQueryable();
             }
+            this.TableType = typeof(T);
+            this.TableName = typeof(T).Name + "s";
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            {
+                string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                this.TableName = $"{schema}.{this.TableName}";
+            }
+            else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
     }
     /// <summary>
@@ -209,7 +284,7 @@ namespace Dapper.TQuery.Development
         }
     }
     /// <summary>
-    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with <see cref="Dapper.TQuery"/> method extensions.
+    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions.
     /// <br/>Like create/drop all tables, get all table defenitions and compare with the code tables, and more.
     /// </summary>
     public class TQueryDatabase
@@ -243,7 +318,7 @@ namespace Dapper.TQuery.Development
         }
     }
     /// <summary>
-    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with <see cref="Dapper.TQuery"/> method extensions, with some advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions, with some advanced options of the TQuery library, to read/modify the generated SQL command, and more.
     /// </summary>
     public class TQueryDatabaseExtended
     {
@@ -275,8 +350,6 @@ namespace Dapper.TQuery.Development
             return SqlConnection.ExecuteAsync(SqlString);
         }
     }
-
-
 
     /// <summary>
     /// SQL dialect enumeration
@@ -335,4 +408,3 @@ namespace Dapper.TQuery.Development
         FullJoin
     }
 }
-

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlClient;
 using System.Reflection;
-using static Dapper.TQuery.TQueryExceptions;
+using static Dapper.TQuery.Development.TQueryExceptions;
 
-namespace Dapper.TQuery
+namespace Dapper.TQuery.Development
 {
     /// <summary>
     /// The start point of using this library.
@@ -110,8 +110,8 @@ namespace Dapper.TQuery
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            
-                
+
+
             TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
             return query;
         }
@@ -283,8 +283,8 @@ namespace Dapper.TQuery
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            
-                
+
+
             TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, TQueryDefaults.SqlDialect);
             return query;
         }
@@ -420,8 +420,8 @@ namespace Dapper.TQuery
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            
-                
+
+
             TQueryable<Table> query = new TQueryable<Table>(sqlConnection, sqlDialect);
             return query;
         }
@@ -448,8 +448,8 @@ namespace Dapper.TQuery
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            
-                
+
+
             TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
             return query;
         }

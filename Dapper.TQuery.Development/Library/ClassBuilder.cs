@@ -4,7 +4,7 @@ using System.Dynamic;
 
 namespace Dapper.TQuery.Development
 {
-    public class ClassBuilder : DynamicObject
+    internal class ClassBuilder : DynamicObject
     {
         private Dictionary<string, KeyValuePair<Type, object>> _fields;
 
@@ -37,7 +37,7 @@ namespace Dapper.TQuery.Development
         }
     }
 
-    public class Field
+    internal class Field
     {
         public Field(string name, Type type)
         {

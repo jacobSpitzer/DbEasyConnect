@@ -9,9 +9,9 @@ using System.Data;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using static Dapper.TQuery.FieldAttributes;
+using static Dapper.TQuery.Development.FieldAttributes;
 
-namespace Dapper.TQuery
+namespace Dapper.TQuery.Development
 {
 
     /// <summary>

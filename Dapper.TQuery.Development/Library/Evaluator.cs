@@ -4,10 +4,10 @@ using System.Linq.Expressions;
 
 namespace Dapper.TQuery.Development
 {
-    public static class Evaluator
+    internal static class Evaluator
     {
         /// <summary>
-        /// Performs evaluation & replacement of independent sub-trees
+        /// Performs evaluation and replacement of independent sub-trees
         /// </summary>
         /// <param name="expression">The root of the expression tree.</param>
         /// <param name="fnCanBeEvaluated">A function that decides whether a given expression node can be part of the local function.</param>
@@ -18,7 +18,7 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// Performs evaluation & replacement of independent sub-trees
+        /// Performs evaluation and replacement of independent sub-trees
         /// </summary>
         /// <param name="expression">The root of the expression tree.</param>
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
@@ -33,7 +33,7 @@ namespace Dapper.TQuery.Development
         }
 
         /// <summary>
-        /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
+        /// Evaluates and replaces sub-trees when first candidate is reached (top-down)
         /// </summary>
         class SubtreeEvaluator : ExpressionVisitor
         {
