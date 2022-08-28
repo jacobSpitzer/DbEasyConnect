@@ -1,7 +1,7 @@
 # DbEasyConnect Library
 
-[![NuGet](https://img.shields.io/nuget/v/DbEasyConnect.svg)](https://www.nuget.org/packages/DbEasyConnect)
-[![NuGet](https://img.shields.io/nuget/dt/DbEasyConnect.svg)](https://www.nuget.org/packages/DbEasyConnect)
+[![NuGet](https://img.shields.io/nuget/v/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
+[![NuGet](https://img.shields.io/nuget/dt/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
 
 ## Description
 ``DbEasyConnect`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/DbEasyConnect) package that provides database connection services with the focus on the following three goals:
