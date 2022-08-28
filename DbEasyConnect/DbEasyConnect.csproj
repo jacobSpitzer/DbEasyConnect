@@ -7,12 +7,20 @@
     <Authors>Jacob Spitzer</Authors>
     <Company>QuickApps</Company>
     <Product>DbEasyConnect</Product>
-    <Description>Use Dapper 'Queryable' like 'Linq'.
-* Avoid complex entity-framework configuration, create/delete all tables with writing table classes only.
-* Fast performance with Dapper, and restricted sql commands like Linq to avoid incorrect sql syntax.
-* The generated SQL commands is readeble and editable. Up to the Developer settings.</Description>
+    <Description>Communicate with any database the fastest way with easiest configuration, and strongly typed written.
+This Library was created to replace Entity Framework complexity, Slow-performing, diagnose issues, (Learn more here) and allows you to read/update the SQL string before executing.
+
+It is based on the Dapper library, with the following advantages:
+
+* Use Dapper with most of Linq methods as an System.Linq.IQueryable object without downloading the records. see also Dapper.NET and IQueryable issue.
+
+* Use Code First feature, or/and modify the database from the code, with just one or two lines of code.
+
+* Use the fastest easiest way for CRUD (Create, Read, Update, and Delete) operations, Find by ID, bulk insert/update/delete even with Entity List.
+
+Gives a strong typed coding experience, to querying the database similar to entity framework, which avoids spelling mistakes on table and field names.</Description>
     <Copyright>Copyright 2022 QuickApps.ca</Copyright>
-    <PackageProjectUrl>https://www.quickapps.ca/projects/dapper-tquery-library</PackageProjectUrl>
+    <PackageProjectUrl>https://www.quickapps.ca/projects/dbeasyconnect-library</PackageProjectUrl>
     <PackageIcon></PackageIcon>
     <PackageIconUrl />
     <PackageTags>dapper queryable quickapps</PackageTags>
@@ -20,6 +28,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/jacobSpitzer/DbEasyConnect</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <Title>DbEasyConnect</Title>
     <!--<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	  <DocumentationFile>obj\Debug\netstandard2.1\DbEasyConnect.xml</DocumentationFile>
 	  <DefaultDocumentationAssemblyPageName>Home</DefaultDocumentationAssemblyPageName>
