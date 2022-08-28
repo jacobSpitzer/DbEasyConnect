@@ -1,10 +1,10 @@
-# Dapper.IDbEc Library
+# DbEasyConnect Library
 
-[![NuGet](https://img.shields.io/nuget/v/Dapper.IDbEc.svg)](https://www.nuget.org/packages/Dapper.IDbEc)
-[![NuGet](https://img.shields.io/nuget/dt/Dapper.IDbEc.svg)](https://www.nuget.org/packages/Dapper.IDbEc)
+[![NuGet](https://img.shields.io/nuget/v/DbEasyConnect.svg)](https://www.nuget.org/packages/DbEasyConnect)
+[![NuGet](https://img.shields.io/nuget/dt/DbEasyConnect.svg)](https://www.nuget.org/packages/DbEasyConnect)
 
 ## Description
-``Dapper.IDbEc`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/Dapper.IDbEc) package that provides database connection services with the focus on the following three goals:
+``DbEasyConnect`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/DbEasyConnect) package that provides database connection services with the focus on the following three goals:
 * Get the fastest performance
 * Avoid configuration as much as possible
 * Support strong typed coding and avoid bugs and spelling mistakes.
@@ -56,14 +56,14 @@ GroupBy, Count, Sum, Max, Min, Add/Modify/Delete Column, and more
 Install with the Package Manager Console in Visual Studio (PowerShell)
 
 ```sh
-PM> Install-Package Dapper.IDbEc
+PM> Install-Package DbEasyConnect
 
 ```
 
 Install via Dotnet CLI
 
 ```sh
-dotnet add package Dapper.IDbEc
+dotnet add package DbEasyConnect
 
 ```
 
@@ -88,7 +88,7 @@ var con = new SqlConnection("Server=YOUR.SERVER.COM; Database=DATABASE_NAME; Use
 // Get all records from the Sample Table
 con.IDbEc<Sample>().GetAll();          
 ```
-[Check out the 'Start' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcStartExtensions)
+[Check out the 'Start' wiki](https://github.com/jacobSpitzer/DbEasyConnect/wiki/IDbEcStartExtensions)
 
 #### How to write a Table Class
 
@@ -139,16 +139,16 @@ StringLength
 
 #### Create / Modify Tables & Database, Compare / Migrate Code Tables VS Server Database
 
-[Check out the 'Table & Database Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcTableExtensions)
+[Check out the 'Table & Database Methods' wiki](https://github.com/jacobSpitzer/DbEasyConnect/wiki/IDbEcTableExtensions)
 
 #### Supported Linq Methods
 
-[Check out the 'Linq Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcLinqExtensions)
+[Check out the 'Linq Methods' wiki](https://github.com/jacobSpitzer/DbEasyConnect/wiki/IDbEcLinqExtensions)
 
 #### Get, Find, Insert, Update, Delete, InsertList, UpdateList, DeleteList
 
-[Check out the 'Crud Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcCrudExtensions)
+[Check out the 'Crud Methods' wiki](https://github.com/jacobSpitzer/DbEasyConnect/wiki/IDbEcCrudExtensions)
 
 #### Full Library Reference
 
-[Check out the wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/Home)
+[Check out the wiki](https://github.com/jacobSpitzer/DbEasyConnect/wiki/Home)

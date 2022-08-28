@@ -53,7 +53,7 @@
     <add key="VBdocman_dontSortSeeAlsoList"><![CDATA[0]]></add>
     <add key="VBdocman_templateFolder"><![CDATA[$(VSdocmanDir)Templates]]></add>
     <add key="VBdocman_ConstantValueDisplay"><![CDATA[1]]></add>
-    <add key="VBdocman_helpTitle"><![CDATA[Dapper.IDbEc Reference]]></add>
+    <add key="VBdocman_helpTitle"><![CDATA[DbEasyConnect Reference]]></add>
     <add key="VBdocman_insertSourceGlobal"><![CDATA[0]]></add>
     <add key="VBdocman_SupportedNetStandard"><![CDATA[]]></add>
     <add key="VBdocman_SupportedXamarinMac"><![CDATA[]]></add>
@@ -71,7 +71,7 @@
   <topic>
     <type>normal</type>
     <is-default>yes</is-default>
-    <name>Dapper.IDbEc Reference</name>
+    <name>DbEasyConnect Reference</name>
     <id>dappertquery_reference</id>
     <comment><![CDATA[<summary></summary>vsdocman_escaped_]_]_></comment>
     <namespaces />

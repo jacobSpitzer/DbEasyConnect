@@ -56,7 +56,7 @@ namespace DbEasyConnect.Linq
         /// A function to create a result record from two joined table records.
         /// </param>
         /// <param name="joinType">
-        /// A join type selected by the Dapper.IDbEc.JoinType enum. Available options: InnerJoin, LeftJoin, RightJoin, FullJoin. If no option is selected, The default will be InnerJoin.
+        /// A join type selected by the DbEasyConnect.JoinType enum. Available options: InnerJoin, LeftJoin, RightJoin, FullJoin. If no option is selected, The default will be InnerJoin.
         /// </param>
         /// <typeparam name="TOuter">
         /// The table type of the records of the first table.
