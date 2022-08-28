@@ -93,11 +93,11 @@ namespace DbEasyConnect
             return SqlConnection.QueryAsync<T>(SqlString);
         }
         /// <summary>
-        /// Returns the IDbEc generated Sql command.<br/>
-        /// To modify the Sql command manually, use the IDbEcExtended method,
-        /// and then use the <see cref="TQueryStartExtensions.ModifySqlString{Table}(TQueryableExtended{Table}, string)"/> method.
+        /// Returns the <see cref="DbEasyConnect"/> generated Sql command.<br/>
+        /// To modify the Sql command manually, use the DbEcExtended method,
+        /// and then use the <see cref="InitExtensions.ModifySqlString{Table}(DbEcExtended{Table}, string)"/> method.
         /// </summary>
-        /// <returns> IDbEc generated Sql command as a String.</returns>
+        /// <returns> The <see cref="DbEasyConnect"/> generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
@@ -108,7 +108,7 @@ namespace DbEasyConnect
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         /// <summary>
-        /// Execute IDbEc SQL command.
+        /// Execute DbEasyConnect SQL command.
         /// </summary>
         /// <returns>The number of rows affected.</returns>
         public int Execute()
@@ -116,7 +116,7 @@ namespace DbEasyConnect
             return SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute IDbEc SQL command asynchronously using Task.
+        /// Execute DbEasyConnect SQL command asynchronously using Task.
         /// </summary>
         /// <returns>The number of rows affected.</returns>
         public Task<int> ExecuteAsync()
@@ -124,18 +124,18 @@ namespace DbEasyConnect
             return SqlConnection.ExecuteAsync(SqlString);
         }
         /// <summary>
-        /// Returns the IDbEc generated Sql command.<br/>
-        /// To modify the Sql command manually, use the IDbEcExtended method,
+        /// Returns the DbEasyConnect generated Sql command.<br/>
+        /// To modify the Sql command manually, use the DbEcExtended method,
         /// and then use the ModifySqlString or ReplaceInSqlString method.
         /// </summary>
-        /// <returns> IDbEc generated Sql command as a String.</returns>
+        /// <returns> DbEasyConnect generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
         }
     }
     /// <summary>
-    /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the Database with Dapper.TQuery method extensions.
+    /// An <see cref="DbEc{T}"/> is a DbEasyConnect instanse which will be used to query and/or modify the Database with DbEasyConnect method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEc<T> : IDbEcGet<T>
@@ -198,7 +198,7 @@ namespace DbEasyConnect
     }
 
     /// <summary>
-    /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the Database with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+    /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the Database with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcExtended<T> : IDbEcGet<T>
@@ -239,38 +239,38 @@ namespace DbEasyConnect
         }
     }
     /// <summary>
-    /// An <see cref="TQueryableSelect{T}"/> instanse which will be used for the 'Select' method extensions.
+    /// An <see cref="DbEcSelect{T}"/> instanse which will be used for the 'Select' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcSelect<T> : IDbEcGet<T> { }
     /// <summary>
-    /// An <see cref="TQueryableOrder{T}"/> instanse which will be used for the 'Order' method extensions.
+    /// An <see cref="DbEcOrder{T}"/> instanse which will be used for the 'Order' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcOrder<T> : IDbEcGet<T> { }
     /// <summary>
-    /// An <see cref="TQueryableUpdate{T}"/> instanse which will be used for the 'Update' method extensions.
+    /// An <see cref="DbEcUpdate{T}"/> instanse which will be used for the 'Update' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcUpdate<T> : IDbEcExecute<T> { }
     /// <summary>
-    /// An <see cref="TQueryableDelete{T}"/> instanse which will be used for the 'Delete' method extensions.
+    /// An <see cref="DbEcDelete{T}"/> instanse which will be used for the 'Delete' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcDelete<T> : IDbEcExecute<T> { }
     /// <summary>
-    /// An <see cref="TQueryableCreate{T}"/> instanse which will be used for all 'Create/Modify/Delete Table' method extensions.
+    /// An <see cref="DbEcCreate{T}"/> instanse which will be used for all 'Create/Modify/Delete Table' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcCreate<T> : IDbEcExecute<T> { }
     /// <summary>
-    /// An <see cref="TQueryableBool{T}"/> instanse which will be used for the 'Boolean' method extensions.
+    /// An <see cref="DbEcBool{T}"/> instanse which will be used for the 'Boolean' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DbEcBool<T> : IDbEc<T>
     {
         /// <summary>
-        /// Execute IDbEc SQL boolean command and returns true or false.
+        /// Execute DbEasyConnect SQL boolean command and returns true or false.
         /// </summary>
         /// <returns> True if the command result is true, otherwise returns false.</returns>
         public bool Execute()
@@ -278,7 +278,7 @@ namespace DbEasyConnect
             return SqlConnection.ExecuteScalar<bool>(SqlString);
         }
         /// <summary>
-        /// Execute IDbEc SQL boolean command asynchronously using Task, and returns true or false.
+        /// Execute DbEasyConnect SQL boolean command asynchronously using Task, and returns true or false.
         /// </summary>
         /// <returns> True if the command result is true, otherwise returns false.</returns>
         public Task<bool> ExecuteAsync()
@@ -287,7 +287,7 @@ namespace DbEasyConnect
         }
     }
     /// <summary>
-    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions.
+    /// An <see cref="IDbEcDatabase"/> instanse which will be used to handle with all tables at once on the Database with DbEasyConnect method extensions.
     /// <br/>Like create/drop all tables, get all table defenitions and compare with the code tables, and more.
     /// </summary>
     public class IDbEcDatabase
@@ -306,14 +306,14 @@ namespace DbEasyConnect
             this.SqlDialect = sqlDialect;
         }
         /// <summary>
-        /// Execute IDbEc SQL command.
+        /// Execute DbEasyConnect SQL command.
         /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute IDbEc SQL command asynchronously using Task.
+        /// Execute DbEasyConnect SQL command asynchronously using Task.
         /// </summary>
         public Task<int> ExecuteAsync()
         {
@@ -321,7 +321,7 @@ namespace DbEasyConnect
         }
     }
     /// <summary>
-    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions, with some advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+    /// An <see cref="IDbEcDatabase"/> instanse which will be used to handle with all tables at once on the Database with DbEasyConnect method extensions, with some advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
     /// </summary>
     public class IDbEcDatabaseExtended
     {
@@ -339,14 +339,14 @@ namespace DbEasyConnect
             this.SqlDialect = sqlDialect;
         }
         /// <summary>
-        /// Execute IDbEc SQL command.
+        /// Execute DbEasyConnect SQL command.
         /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute IDbEc SQL command asynchronously using Task.
+        /// Execute DbEasyConnect SQL command asynchronously using Task.
         /// </summary>
         public Task<int> ExecuteAsync()
         {

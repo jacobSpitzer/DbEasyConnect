@@ -38,7 +38,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table"></typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/>.</param>
+        /// An <see cref="DbEc{T}"/>.</param>
         /// <returns>
         /// All records in IDbEc table.
         /// </returns>
@@ -54,7 +54,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table"></typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/>.</param>
+        /// An <see cref="DbEc{T}"/>.</param>
         /// <param name="id">Id of the entity to get, must be marked with [Key] attribute</param>
         /// <param name="keyColumnName"> The column name of the primary key. </param>
         /// <returns>
@@ -73,7 +73,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table"></typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/>.</param>
+        /// An <see cref="DbEc{T}"/>.</param>
         /// <param name="ids">Id of the entity to get, must be marked with [Key] attribute</param>
         /// <param name="keyColumnName"> The column name of the primary key. </param>
         /// <returns>
@@ -90,7 +90,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the insert command.
+        /// An <see cref="DbEc{T}"/> to perform the insert command.
         /// </param>
         /// <param name="entity">
         /// An single entity to insert.
@@ -107,7 +107,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the insert command.
+        /// An <see cref="DbEc{T}"/> to perform the insert command.
         /// </param>
         /// <param name="entity">
         /// An single entity to insert.
@@ -124,7 +124,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the insert command.
+        /// An <see cref="DbEc{T}"/> to perform the insert command.
         /// </param>
         /// <param name="entities">
         /// An list of entities to insert.
@@ -145,7 +145,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the insert command.
+        /// An <see cref="DbEc{T}"/> to perform the insert command.
         /// </param>
         /// <param name="entities">
         /// An list of entities to insert.
@@ -175,7 +175,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the update command.
+        /// An <see cref="DbEc{T}"/> to perform the update command.
         /// </param>
         /// <param name="entity">
         /// An single entity to update.
@@ -189,11 +189,11 @@ namespace DbEasyConnect.Crud
         }
 
         /// <summary>
-        /// Updates one or more columns on all records of the IDbEc recordset to the database table by the predicate assignment(s).  
+        /// Updates one or more columns on all records of the DbEasyConnect recordset to the database table by the predicate assignment(s).  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the update command.
+        /// An <see cref="DbEc{T}"/> to perform the update command.
         /// </param>
         /// <param name="expression">
         /// The columns to be updated with their new value assignment.
@@ -209,18 +209,18 @@ namespace DbEasyConnect.Crud
         }
 
         /// <summary>
-        /// Updates one or more columns on all records of the IDbEc recordset to the database table by the predicate assignment(s).  
+        /// Updates one or more columns on all records of the DbEasyConnect recordset to the database table by the predicate assignment(s).  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the update command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the update command.
         /// </param>
         /// <param name="assignment">
         /// The columns to be updated with their new value assignment.
         /// Example: IDbEc&lt;Sample&gt;().Update(x =&gt; new Sample { MyProperty = x.MyInteger + 5, MyString = null, MyBool = true, MyOtherString = "something" })
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableUpdate{T}"/> instance, which the SQL command will update records in the database, and <see cref="TQueryExecute{T}.Execute"/> will return the number of records updated successfully.
+        /// An <see cref="DbEcUpdate{T}"/> instance, which the SQL command will update records in the database, and <see cref="IDbEcExecute{T}.Execute"/> will return the number of records updated successfully.
         /// </returns>
         public static DbEcUpdate<Table> Update<Table>(this DbEcExtended<Table> dbEcQuery, Expression<Func<Table, Table>> assignment)
         {
@@ -234,7 +234,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the update command.
+        /// An <see cref="DbEc{T}"/> to perform the update command.
         /// </param>
         /// <param name="entities">
         /// An list of entities to update.
@@ -261,11 +261,11 @@ namespace DbEasyConnect.Crud
         }
 
         /// <summary>
-        /// Deletes all records of the IDbEc recordset on the database table.  
+        /// Deletes all records of the DbEasyConnect recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the update command.
+        /// An <see cref="DbEc{T}"/> to perform the update command.
         /// </param>
         /// <returns>
         /// The number of records deleted successfully.
@@ -278,14 +278,14 @@ namespace DbEasyConnect.Crud
         }
 
         /// <summary>
-        /// Deletes all records of the IDbEc recordset on the database table.  
+        /// Deletes all records of the DbEasyConnect recordset on the database table.  
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the update command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the update command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableDelete{T}"/> instance, which the SQL command will delete records in the database, and <see cref="TQueryExecute{T}.Execute"/> will return the number of records deleted successfully.
+        /// An <see cref="DbEcDelete{T}"/> instance, which the SQL command will delete records in the database, and <see cref="IDbEcExecute{T}.Execute"/> will return the number of records deleted successfully.
         /// </returns>
         public static DbEcDelete<Table> Delete<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -300,7 +300,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the delete command.
+        /// An <see cref="DbEc{T}"/> to perform the delete command.
         /// </param>
         /// <param name="entity">
         /// An single entity to delete.
@@ -318,7 +318,7 @@ namespace DbEasyConnect.Crud
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the delete command.
+        /// An <see cref="DbEc{T}"/> to perform the delete command.
         /// </param>
         /// <param name="entities">
         /// An list of entities to delete.

@@ -28,7 +28,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Create Table command.
         /// </param>
         public static void CreateTable<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -41,10 +41,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Create Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Create Table command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Create Table command.
         /// </returns>
         public static DbEcCreate<Table> CreateTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -62,7 +62,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Create Table command.
         /// </param>
         public static int OverrideTable<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -76,10 +76,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Override Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Override Table command.
         /// </param>
         ///<returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Override the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Override Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will Override the Table in the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Override Table command.
         /// </returns>
         public static DbEcCreate<Table> OverrideTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -97,7 +97,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Modify Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Modify Table command.
         /// </param>
         public static int ModifyTable<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -111,10 +111,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Modify Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Modify Table command.
         /// </param>
         ///<returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Modify the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Modify Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will Modify the Table in the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Modify Table command.
         /// </returns>
         public static DbEcCreate<Table> ModifyTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -131,7 +131,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Create Table command.
         /// </param>
         public static void CreateTableIfNotExists<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -144,10 +144,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Create Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Create Table command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Create Table command.
         /// </returns>
         public static DbEcCreate<Table> CreateTableIfNotExists<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -163,7 +163,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Drop Table command.
         /// </param>
         public static void DropTable<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -175,10 +175,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Drop Table command.
         /// </returns>
         public static DbEcCreate<Table> DropTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -194,7 +194,7 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Drop Table command.
         /// </param>
         public static int DropTableIfExists<Table>(this DbEc<Table> dbEcQuery)
         {
@@ -206,10 +206,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
+        /// An <see cref="DbEcExtended{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop Table command.
+        /// An <see cref="DbEcCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Drop Table command.
         /// </returns>
         public static DbEcCreate<Table> DropTableIfExists<Table>(this DbEcExtended<Table> dbEcQuery)
         {
@@ -405,7 +405,7 @@ namespace DbEasyConnect
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to perform the Create All Tables command.
+        /// An <see cref="IDbEcDatabase"/> to perform the Create All Tables command.
         /// </param>
         public static void CreateAllTables(this IDbEcDatabase dbEcQuery)
         {
@@ -430,10 +430,10 @@ namespace DbEasyConnect
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabaseExtended"/> to perform the Create All Tables command.
+        /// An <see cref="IDbEcDatabaseExtended"/> to perform the Create All Tables command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will create all Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
+        /// An <see cref="IDbEcDatabaseExtended"/> instance, which the SQL command will create all Tables on the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Create All Tables command.
         /// </returns>
         public static IDbEcDatabaseExtended CreateAllTables(this IDbEcDatabaseExtended dbEcQuery)
         {
@@ -458,7 +458,7 @@ namespace DbEasyConnect
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to perform the Create All Tables command.
+        /// An <see cref="IDbEcDatabase"/> to perform the Create All Tables command.
         /// </param>
         public static void CreateAllTablesIfNotExists(this IDbEcDatabase dbEcQuery)
         {
@@ -483,10 +483,10 @@ namespace DbEasyConnect
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabaseExtended"/> to perform the Create All Tables command.
+        /// An <see cref="IDbEcDatabaseExtended"/> to perform the Create All Tables command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will create all non-exists Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
+        /// An <see cref="IDbEcDatabaseExtended"/> instance, which the SQL command will create all non-exists Tables on the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Create All Tables command.
         /// </returns>
         public static IDbEcDatabaseExtended CreateAllTablesIfNotExists(this IDbEcDatabaseExtended dbEcQuery)
         {
@@ -510,7 +510,7 @@ namespace DbEasyConnect
         /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to perform the Drop All Tables command.
+        /// An <see cref="IDbEcDatabase"/> to perform the Drop All Tables command.
         /// </param>
         public static int DropAllTables(this IDbEcDatabase dbEcQuery)
         {
@@ -535,10 +535,10 @@ namespace DbEasyConnect
         /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to perform the Drop All Tables command.
+        /// An <see cref="IDbEcDatabase"/> to perform the Drop All Tables command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will remove all Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop All Tables command.
+        /// An <see cref="IDbEcDatabaseExtended"/> instance, which the SQL command will remove all Tables on the database, and <see cref="IDbEcExecute{T}.Execute"/> will execute the Drop All Tables command.
         /// </returns>
         public static IDbEcDatabaseExtended DropAllTables(this IDbEcDatabaseExtended dbEcQuery)
         {
@@ -563,7 +563,7 @@ namespace DbEasyConnect
         /// Returns a list of all table defenitions from the server database.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to get all database tables and their fields.
+        /// An <see cref="IDbEcDatabase"/> to get all database tables and their fields.
         /// </param>
         /// <returns>
         /// An <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> which the Key is the table name, and the Value is an Dynamic Class as an <see cref="System.Dynamic.DynamicObject"/> including the table defenition, fields, and attributes. 
@@ -595,7 +595,7 @@ namespace DbEasyConnect
         /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to compare the server database with all tables on the code classes.  
+        /// An <see cref="IDbEcDatabase"/> to compare the server database with all tables on the code classes.  
         /// </param>
         /// <returns>
         /// True if all tables, fields, and properties on the server database matches the code classes with [Table] attribute. Otherwise, returns false.
@@ -650,7 +650,7 @@ namespace DbEasyConnect
         /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryDatabase"/> to compare the server database with all tables on the code classes.  
+        /// An <see cref="IDbEcDatabase"/> to compare the server database with all tables on the code classes.  
         /// </param>
         /// <returns>
         /// An list of <see cref="CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
@@ -710,10 +710,10 @@ namespace DbEasyConnect
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> to perform the Drop Table command.
+        /// An <see cref="DbEc{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
-        /// An list of <see cref="TQueryTableExtensions.CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
+        /// An list of <see cref="IDbEcTableExtensions.CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
         /// </returns>
         public static List<CompareDb> GetDiffServerTableToCodeTable<Table>(this DbEc<Table> dbEcQuery)
         {

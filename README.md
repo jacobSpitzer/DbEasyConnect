@@ -1,10 +1,10 @@
-# Dapper.TQuery Library
+# Dapper.IDbEc Library
 
-[![NuGet](https://img.shields.io/nuget/v/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
-[![NuGet](https://img.shields.io/nuget/dt/Dapper.TQuery.svg)](https://www.nuget.org/packages/Dapper.TQuery)
+[![NuGet](https://img.shields.io/nuget/v/Dapper.IDbEc.svg)](https://www.nuget.org/packages/Dapper.IDbEc)
+[![NuGet](https://img.shields.io/nuget/dt/Dapper.IDbEc.svg)](https://www.nuget.org/packages/Dapper.IDbEc)
 
 ## Description
-``Dapper.TQuery`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/Dapper.TQuery) package that provides database connection services with the focus on the following three goals:
+``Dapper.IDbEc`` is a c# based [NuGet Library](https://github.com/jacobSpitzer/Dapper.IDbEc) package that provides database connection services with the focus on the following three goals:
 * Get the fastest performance
 * Avoid configuration as much as possible
 * Support strong typed coding and avoid bugs and spelling mistakes.
@@ -56,14 +56,14 @@ GroupBy, Count, Sum, Max, Min, Add/Modify/Delete Column, and more
 Install with the Package Manager Console in Visual Studio (PowerShell)
 
 ```sh
-PM> Install-Package Dapper.TQuery
+PM> Install-Package Dapper.IDbEc
 
 ```
 
 Install via Dotnet CLI
 
 ```sh
-dotnet add package Dapper.TQuery
+dotnet add package Dapper.IDbEc
 
 ```
 
@@ -86,9 +86,9 @@ and then:
 // Create a SqlConnection
 var con = new SqlConnection("Server=YOUR.SERVER.COM; Database=DATABASE_NAME; User ID=USER_ID;Password=*******; Trusted_Connection=False; MultipleActiveResultSets=True");
 // Get all records from the Sample Table
-con.TQuery<Sample>().GetAll();          
+con.IDbEc<Sample>().GetAll();          
 ```
-[Check out the 'Start' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryStartExtensions)
+[Check out the 'Start' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcStartExtensions)
 
 #### How to write a Table Class
 
@@ -139,16 +139,16 @@ StringLength
 
 #### Create / Modify Tables & Database, Compare / Migrate Code Tables VS Server Database
 
-[Check out the 'Table & Database Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryTableExtensions)
+[Check out the 'Table & Database Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcTableExtensions)
 
 #### Supported Linq Methods
 
-[Check out the 'Linq Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryLinqExtensions)
+[Check out the 'Linq Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcLinqExtensions)
 
 #### Get, Find, Insert, Update, Delete, InsertList, UpdateList, DeleteList
 
-[Check out the 'Crud Methods' wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/TQueryCrudExtensions)
+[Check out the 'Crud Methods' wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/IDbEcCrudExtensions)
 
 #### Full Library Reference
 
-[Check out the wiki](https://github.com/jacobSpitzer/Dapper.TQuery/wiki/Home)
+[Check out the wiki](https://github.com/jacobSpitzer/Dapper.IDbEc/wiki/Home)

@@ -835,7 +835,7 @@ namespace DbEasyConnect.Tools
             string[] arg = new string[] { };
             switch (expression.Method.Name)
             {
-                //case nameof(TQueryExtensions.PUpdate):
+                //case nameof(IDbEcExtensions.PUpdate):
                 //    unary = (UnaryExpression)expression.Arguments[0];
                 //    var lambda = (LambdaExpression)StripQuotes(expression.Arguments[0]);
                 //    if (unary.ToString().Contains("AnonymousType"))

@@ -10,17 +10,17 @@ namespace DbEasyConnect
     /// <summary>
     /// The start point of using this library.
     /// <br/>
-    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with IDbEc method extensions.
-    /// Or <see cref="TQueryableExtended{T}"/> instanse, for more advanced options.
+    /// Initialize a new <see cref="DbEc{T}"/> instanse, to query and/or modify the table with DbEasyConnect method extensions.
+    /// Or <see cref="DbEcExtended{T}"/> instanse, for more advanced options.
     /// <br/>
-    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with IDbEc method extensions.
-    /// Or <see cref="TQueryDatabaseExtended"/> instanse, for more advanced options.
+    /// Initialize a new <see cref="IDbEcDatabase"/> instanse, to modify the Database table defenitions with DbEasyConnect method extensions.
+    /// Or <see cref="IDbEcDatabaseExtended"/> instanse, for more advanced options.
     /// </summary>
     public static class InitExtensions
     {
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -29,7 +29,7 @@ namespace DbEasyConnect
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEc<Table>(this SqlConnection sqlConnection)
@@ -42,7 +42,7 @@ namespace DbEasyConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -55,7 +55,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEc<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -68,7 +68,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -77,7 +77,7 @@ namespace DbEasyConnect
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtended<Table>(this SqlConnection sqlConnection)
@@ -90,7 +90,7 @@ namespace DbEasyConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -103,7 +103,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtended<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -118,13 +118,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDb(this SqlConnection sqlConnection)
@@ -135,7 +135,7 @@ namespace DbEasyConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
@@ -145,7 +145,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDb(this SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -157,13 +157,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtended(this SqlConnection sqlConnection)
@@ -174,7 +174,7 @@ namespace DbEasyConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
@@ -184,7 +184,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtended(this SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -196,15 +196,15 @@ namespace DbEasyConnect
 
 
         /// <summary>
-        /// Modifies manually the IDbEc SQL command with any given string.<br/>
+        /// Modifies manually the DbEasyConnect SQL command with any given string.<br/>
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> that contains the queryable table to apply the predicate to.
+        /// An <see cref="DbEc{T}"/> that contains the queryable table to apply the predicate to.
         /// </param>
         /// <param name="sql"> A given string for SQL command.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse with the updated SQL command.
+        /// An <see cref="DbEcExtended{T}"/> instanse with the updated SQL command.
         /// </returns>
         public static DbEcExtended<Table> ModifySqlString<Table>(this DbEcExtended<Table> dbEcQuery, string sql)
         {
@@ -213,16 +213,16 @@ namespace DbEasyConnect
         }
 
         /// <summary>
-        /// Replaces parts of the IDbEc SQL command.<br/>
+        /// Replaces parts of the DbEasyConnect SQL command.<br/>
         /// Use this method to replace any part of the SQL string according to the Database language.
         /// </summary>
         /// <param name="dbEcQuery">
-        /// An <see cref="TQueryable{T}"/> that contains the queryable table to apply the predicate to.
+        /// An <see cref="DbEc{T}"/> that contains the queryable table to apply the predicate to.
         /// </param>
         /// <param name="oldValue">Old value</param>
         /// <param name="newValue">New value</param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse with the updated SQL command.
+        /// An <see cref="DbEcExtended{T}"/> instanse with the updated SQL command.
         /// </returns>
         public static DbEcExtended<Table> ReplaceInSqlString<Table>(this DbEcExtended<Table> dbEcQuery, String oldValue, String newValue)
         {
@@ -235,17 +235,17 @@ namespace DbEasyConnect
     /// <summary>
     /// The start point of using this library.
     /// <br/>
-    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with IDbEc method extensions.
-    /// Or <see cref="TQueryableExtended{T}"/> instanse, for more advanced options.
+    /// Initialize a new <see cref="DbEc{T}"/> instanse, to query and/or modify the table with DbEasyConnect method extensions.
+    /// Or <see cref="DbEcExtended{T}"/> instanse, for more advanced options.
     /// <br/>
-    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with IDbEc method extensions.
-    /// Or <see cref="TQueryDatabaseExtended"/> instanse, for more advanced options.
+    /// Initialize a new <see cref="IDbEcDatabase"/> instanse, to modify the Database table defenitions with DbEasyConnect method extensions.
+    /// Or <see cref="IDbEcDatabaseExtended"/> instanse, for more advanced options.
     /// </summary>
     public static class IDbEcStartMethods
     {
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -254,7 +254,7 @@ namespace DbEasyConnect
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEcInit<Table>(SqlConnection sqlConnection)
@@ -267,7 +267,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -276,7 +276,7 @@ namespace DbEasyConnect
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtendedInit<Table>(SqlConnection sqlConnection)
@@ -291,13 +291,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDbInit(SqlConnection sqlConnection)
@@ -308,13 +308,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtendedInit(SqlConnection sqlConnection)
@@ -325,7 +325,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -334,7 +334,7 @@ namespace DbEasyConnect
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEcInit<Table>(string connectionString)
@@ -345,7 +345,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -354,7 +354,7 @@ namespace DbEasyConnect
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtendedInit<Table>(string connectionString)
@@ -365,13 +365,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDbInit(string connectionString)
@@ -382,13 +382,13 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtendedInit(string connectionString)
@@ -400,7 +400,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -413,7 +413,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEcInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -428,7 +428,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -441,7 +441,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtendedInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -456,7 +456,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
@@ -466,7 +466,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDbInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -477,7 +477,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="sqlConnection">
         /// The SqlConnection to be used to connect to the Server Database.
@@ -487,7 +487,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtendedInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
@@ -498,7 +498,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryable{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEc{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -511,7 +511,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
+        /// An <see cref="DbEc{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static DbEc<Table> IDbEcInit<Table>(string connectionString, SqlDialect sqlDialect)
@@ -522,7 +522,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryableExtended{T}"/> class when taken a class type that contains the [Table] attribute.
+        /// Initializes a new instance of the <see cref="DbEcExtended{T}"/> class when taken a class type that contains the [Table] attribute.
         /// </summary>
         /// <typeparam name="Table">
         /// The type of the records of table class. need to be a class with the [Table] attribute.
@@ -535,7 +535,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="DbEcExtended{T}"/> instanse which will be used to query and/or modify the table with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static DbEcExtended<Table> IDbEcExtendedInit<Table>(string connectionString, SqlDialect sqlDialect)
@@ -546,7 +546,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabase"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabase"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to be used to connect to the Server Database.
@@ -556,7 +556,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
+        /// An <see cref="IDbEcDatabase"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions.
         /// </returns>
         ///         
         public static IDbEcDatabase IDbEcDbInit(string connectionString, SqlDialect sqlDialect)
@@ -567,7 +567,7 @@ namespace DbEasyConnect
 
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
-        /// Initializes a new instance of the <see cref="TQueryDatabaseExtended"/> class.
+        /// Initializes a new instance of the <see cref="IDbEcDatabaseExtended"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to be used to connect to the Server Database.
@@ -577,7 +577,7 @@ namespace DbEasyConnect
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
+        /// An <see cref="IDbEcDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with DbEasyConnect method extensions with advanced options of the DbEasyConnect library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
         public static IDbEcDatabaseExtended IDbEcDbExtendedInit(string connectionString, SqlDialect sqlDialect)

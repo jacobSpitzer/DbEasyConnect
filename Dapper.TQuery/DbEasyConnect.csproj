@@ -18,17 +18,17 @@
     <PackageTags>dapper queryable quickapps</PackageTags>
     <PackageReleaseNotes>Added all possible DataTypes with custom default length, Property Attributes like EF, Custom TableName, and much more.</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/jacobSpitzer/Dapper.TQuery</RepositoryUrl>
+    <RepositoryUrl>https://github.com/jacobSpitzer/Dapper.IDbEc</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <!--<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	  <DocumentationFile>obj\Debug\netstandard2.1\Dapper.TQuery.xml</DocumentationFile>
+	  <DocumentationFile>obj\Debug\netstandard2.1\Dapper.IDbEc.xml</DocumentationFile>
 	  <DefaultDocumentationAssemblyPageName>Home</DefaultDocumentationAssemblyPageName>
     <ApplicationIcon>C:\Users\User\Downloads\QuickAppsIco.ico</ApplicationIcon>
     <DefaultDocumentationFileNameMode>NameAndMd5Mix</DefaultDocumentationFileNameMode>
 	  <DefaultDocumentationRemoveFileExtensionFromLinks>True</DefaultDocumentationRemoveFileExtensionFromLinks>
 	  <DefaultDocumentationGeneratedAccessModifiers>Public</DefaultDocumentationGeneratedAccessModifiers>
 	  <DefaultDocumentationIgnoreLineBreak>True</DefaultDocumentationIgnoreLineBreak>
-	   <DefaultDocumentationFolder>Dapper.TQuery.wiki\api</DefaultDocumentationFolder>
+	   <DefaultDocumentationFolder>Dapper.IDbEc.wiki\api</DefaultDocumentationFolder>
     <DefaultDocumentationGeneratedPages>Classes, Types, Methods</DefaultDocumentationGeneratedPages>-->
   </PropertyGroup>
 
