@@ -9,7 +9,7 @@ using System.Text;
 
 
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     internal class TableField
     {
@@ -185,7 +185,7 @@ namespace Dapper.TQuery
         }
     }
 
-    public class TQueryExceptions
+    public class DbEcExceptions
     {
 
 
@@ -193,7 +193,7 @@ namespace Dapper.TQuery
         internal class NotSupportedFieldTypeException : Exception
         {
             private System.Reflection.PropertyInfo Field;
-            public override string Message => $"{Field.GetType()} is not supported as an TQuery table field.\nTo exclude this property from the table, add [NotMapped] attribute above {Field}.";
+            public override string Message => $"{Field.GetType()} is not supported as an IDbEc table field.\nTo exclude this property from the table, add [NotMapped] attribute above {Field}.";
             public NotSupportedFieldTypeException(System.Reflection.PropertyInfo field)
             {
                 this.Field = field;

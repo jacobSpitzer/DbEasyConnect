@@ -3,17 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.3.8</Version>
+    <Version>0.5.0</Version>
     <Authors>Jacob Spitzer</Authors>
     <Company>QuickApps</Company>
-    <Product>Dapper.TQuery</Product>
+    <Product>DbEasyConnect</Product>
     <Description>Use Dapper 'Queryable' like 'Linq'.
 * Avoid complex entity-framework configuration, create/delete all tables with writing table classes only.
 * Fast performance with Dapper, and restricted sql commands like Linq to avoid incorrect sql syntax.
 * The generated SQL commands is readeble and editable. Up to the Developer settings.</Description>
-    <Copyright>Copyright 2021 QuickApps.ca</Copyright>
+    <Copyright>Copyright 2022 QuickApps.ca</Copyright>
     <PackageProjectUrl>https://www.quickapps.ca/projects/dapper-tquery-library</PackageProjectUrl>
-    <PackageIcon>QuickAppsIco.png</PackageIcon>
+    <PackageIcon></PackageIcon>
     <PackageIconUrl />
     <PackageTags>dapper queryable quickapps</PackageTags>
     <PackageReleaseNotes>Added all possible DataTypes with custom default length, Property Attributes like EF, Custom TableName, and much more.</PackageReleaseNotes>
@@ -33,25 +33,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.90" />
-    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.1016.290" />
-    <!--<PackageReference Include="DefaultDocumentation" Version="0.7.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>-->
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\..\..\Downloads\QuickAppsIco.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
 </Project>

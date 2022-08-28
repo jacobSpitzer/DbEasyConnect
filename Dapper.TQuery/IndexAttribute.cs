@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     /// <summary>
     /// When this attribute is placed on a property it indicates that the database column to which the

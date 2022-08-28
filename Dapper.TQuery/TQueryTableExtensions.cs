@@ -7,17 +7,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using static Dapper.TQuery.FieldAttributes;
+using static DbEasyConnect.Tools.FieldAttributes;
 using System.Collections;
-using static Dapper.TQuery.TQueryExceptions;
+using static DbEasyConnect.Tools.DbEcExceptions;
+using Dapper;
+using DbEasyConnect.Tools;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect
 {
     /// <summary>
     /// Handle table defenitions, create/modify/delete tables based on the code table classes, and compare between server database and code tables, and more.
     /// <br/>Use Code First feature, or/and modify the database from the code, with just one or two lines of code.
     /// </summary>
-    public static class TQueryTableExtensions
+    public static class IDbEcTableExtensions
     {
 
         /// <summary>
@@ -25,12 +27,12 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
         /// </param>
-        public static void CreateTable<Table>(this TQueryable<Table> tQuery)
+        public static void CreateTable<Table>(this DbEc<Table> dbEcQuery)
         {
-            tQuery.SqlConnection.Execute(CreateSql(tQuery));
+            dbEcQuery.SqlConnection.Execute(CreateSql(dbEcQuery));
         }
 
         /// <summary>
@@ -38,18 +40,18 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Create Table command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create Table command.
         /// </returns>
-        public static TQueryableCreate<Table> CreateTable<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> CreateTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = CreateSql(tQuery)
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = CreateSql(dbEcQuery)
             };
         }
 
@@ -59,12 +61,12 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
         /// </param>
-        public static int OverrideTable<Table>(this TQueryable<Table> tQuery)
+        public static int OverrideTable<Table>(this DbEc<Table> dbEcQuery)
         {
-            return tQuery.SqlConnection.Execute($"DROP TABLE {tQuery.TableName};{Environment.NewLine}{CreateSql(tQuery)}");
+            return dbEcQuery.SqlConnection.Execute($"DROP TABLE {dbEcQuery.TableName};{Environment.NewLine}{CreateSql(dbEcQuery)}");
         }
 
         /// <summary>
@@ -73,18 +75,18 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Override Table command.
         /// </param>
         ///<returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Override the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Override Table command.
         /// </returns>
-        public static TQueryableCreate<Table> OverrideTable<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> OverrideTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"DROP TABLE {tQuery.TableName};{Environment.NewLine}{CreateSql(tQuery)}"
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = $"DROP TABLE {dbEcQuery.TableName};{Environment.NewLine}{CreateSql(dbEcQuery)}"
             };
         }
 
@@ -94,12 +96,12 @@ namespace Dapper.TQuery
         /// Available modifications: Add field, Remove field, Change field datatype. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Modify Table command.
         /// </param>
-        public static int ModifyTable<Table>(this TQueryable<Table> tQuery)
+        public static int ModifyTable<Table>(this DbEc<Table> dbEcQuery)
         {
-            return tQuery.SqlConnection.Execute(ModifySql(tQuery.TableType, tQuery.SqlConnection));
+            return dbEcQuery.SqlConnection.Execute(ModifySql(dbEcQuery.TableType, dbEcQuery.SqlConnection));
         }
 
         //TODO add more options on modify column, like column name by specifieng the old name, and change/add/remove attributes.
@@ -108,18 +110,18 @@ namespace Dapper.TQuery
         /// Available modifications: Add field, Remove field, Change field datatype. 
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Modify Table command.
         /// </param>
         ///<returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Modify the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Modify Table command.
         /// </returns>
-        public static TQueryableCreate<Table> ModifyTable<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> ModifyTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = ModifySql(tQuery.TableType, tQuery.SqlConnection)
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = ModifySql(dbEcQuery.TableType, dbEcQuery.SqlConnection)
             };
         }
 
@@ -128,12 +130,12 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Create Table command.
         /// </param>
-        public static void CreateTableIfNotExists<Table>(this TQueryable<Table> tQuery)
+        public static void CreateTableIfNotExists<Table>(this DbEc<Table> dbEcQuery)
         {
-            tQuery.SqlConnection.Execute($"IF OBJECT_ID(N'{tQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(tQuery)};");
+            dbEcQuery.SqlConnection.Execute($"IF OBJECT_ID(N'{dbEcQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(dbEcQuery)};");
         }
 
         /// <summary>
@@ -141,18 +143,18 @@ namespace Dapper.TQuery
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Create Table command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will Create the Table in the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create Table command.
         /// </returns>
-        public static TQueryableCreate<Table> CreateTableIfNotExists<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> CreateTableIfNotExists<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"IF OBJECT_ID(N'{tQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(tQuery)};"
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = $"IF OBJECT_ID(N'{dbEcQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(dbEcQuery)};"
             };
         }
 
@@ -160,30 +162,30 @@ namespace Dapper.TQuery
         /// Removes a Table from the server database.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
         /// </param>
-        public static void DropTable<Table>(this TQueryable<Table> tQuery)
+        public static void DropTable<Table>(this DbEc<Table> dbEcQuery)
         {
-            tQuery.SqlConnection.Execute($"DROP TABLE {tQuery.TableName}");
+            dbEcQuery.SqlConnection.Execute($"DROP TABLE {dbEcQuery.TableName}");
         }
 
         /// <summary>
         /// Removes a Table from the server database.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop Table command.
         /// </returns>
-        public static TQueryableCreate<Table> DropTable<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> DropTable<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"DROP TABLE {tQuery.TableName}"
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = $"DROP TABLE {dbEcQuery.TableName}"
             };
         }
 
@@ -191,43 +193,43 @@ namespace Dapper.TQuery
         /// Removes a Table from the server database if exists.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
         /// </param>
-        public static int DropTableIfExists<Table>(this TQueryable<Table> tQuery)
+        public static int DropTableIfExists<Table>(this DbEc<Table> dbEcQuery)
         {
-            return tQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {tQuery.TableName}");
+            return dbEcQuery.SqlConnection.Execute($"DROP TABLE IF EXISTS {dbEcQuery.TableName}");
         }
 
         /// <summary>
         /// Removes a Table from the server database if exists.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryableExtended{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryableCreate{T}"/> instance, which the SQL command will remove the Table from the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop Table command.
         /// </returns>
-        public static TQueryableCreate<Table> DropTableIfExists<Table>(this TQueryableExtended<Table> tQuery)
+        public static DbEcCreate<Table> DropTableIfExists<Table>(this DbEcExtended<Table> dbEcQuery)
         {
-            return new TQueryableCreate<Table>()
+            return new DbEcCreate<Table>()
             {
-                SqlConnection = tQuery.SqlConnection,
-                SqlString = $"DROP TABLE IF EXISTS {tQuery.TableName}"
+                SqlConnection = dbEcQuery.SqlConnection,
+                SqlString = $"DROP TABLE IF EXISTS {dbEcQuery.TableName}"
             };
         }
 
-        private static string CreateSql(this TQueryable tQuery)
+        private static string CreateSql(this DbEc dbEcQuery)
         {
-            var props = tQuery.TableType.GetProperties().ToList();
+            var props = dbEcQuery.TableType.GetProperties().ToList();
             List<string> fields = new List<string>();
             List<string> constraints = new List<string>();
             var fieldName = "";
             getPropsNamesAndAttr(props, ref fields, ref constraints, ref fieldName);
-            return $"CREATE TABLE {tQuery.TableName} ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});{Environment.NewLine}";
+            return $"CREATE TABLE {dbEcQuery.TableName} ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});{Environment.NewLine}";
         }
-        private static string CreateSql<T>(this TQuery<T> tQuery)
+        private static string CreateSql<T>(this IDbEc<T> dbEcQuery)
         {
             //TODO order props by decleration order. Code is perfect, but requires to use the [Order] attribute.
             //var props = from property in type.GetProperties()
@@ -236,12 +238,12 @@ namespace Dapper.TQuery
             //                           .GetCustomAttributes(typeof(OrderAttribute), false)
             //                           .Single()).Order
             //                 select property;
-            var props = tQuery.TableType.GetProperties().ToList();
+            var props = dbEcQuery.TableType.GetProperties().ToList();
             List<string> fields = new List<string>();
             List<string> constraints = new List<string>();
             var fieldName = "";
             getPropsNamesAndAttr(props, ref fields, ref constraints, ref fieldName);
-            return $"CREATE TABLE {tQuery.TableName} ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});{Environment.NewLine}";
+            return $"CREATE TABLE {dbEcQuery.TableName} ({Environment.NewLine + fields.Join(Environment.NewLine + ",")});{Environment.NewLine}";
         }
         private static void getPropsNamesAndAttr(List<PropertyInfo> props, ref List<string> fields, ref List<string> constraints, ref string fieldName)
         {
@@ -259,7 +261,7 @@ namespace Dapper.TQuery
                 //if user-defined subType
                 if (field.PropertyType.Assembly.FullName == field.ReflectedType.Assembly.FullName)
                 {
-                    if (TQueryDefaults.AllowSubTypeAuto || field.IsDefined(typeof(SubTypeAttribute)))
+                    if (DbEcDefaults.AllowSubTypeAuto || field.IsDefined(typeof(SubTypeAttribute)))
                     {
                         var subProps = field.PropertyType.GetProperties().ToList();
                         if (field.IsDefined(typeof(SubTypeAttribute)) && field.GetCustomAttribute<SubTypeAttribute>().IncludeParentName) fieldName += field.Name + "_";
@@ -276,11 +278,11 @@ namespace Dapper.TQuery
                 //data-type of the field. Use smart choice, to maximize performance, with common limits.
                 tableField.DataType = field.MatchBestSqlDataType();
                 // default field 'id' is primary key, and auto increment
-                if (tableField.Name.ToLower() == "id" && fieldType.IsIntType() && TQueryDefaults.IdFieldIsKeyByDefault)
+                if (tableField.Name.ToLower() == "id" && fieldType.IsIntType() && DbEcDefaults.IdFieldIsKeyByDefault)
                 { tableField.PrimaryKey = true; tableField.AutoIncrement = true; }
                 //nullable?
                 if (field.IsDefined(typeof(RequiredAttribute)) || field.IsDefined(typeof(KeyAttribute)) ||
-                    fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>) && TQueryDefaults.SetNullablePropsInSqlToNull)
+                    fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(Nullable<>) && DbEcDefaults.SetNullablePropsInSqlToNull)
                     tableField.Required = true;
                 //other attributes
                 foreach (var attribute in field.GetCustomAttributes())
@@ -293,7 +295,7 @@ namespace Dapper.TQuery
                             break;
                         case nameof(KeyAttribute):
                             tableField.PrimaryKey = true;
-                            if (TQueryDefaults.PrimaryKeyIsAutoIncrementByDefault) tableField.AutoIncrement = true;
+                            if (DbEcDefaults.PrimaryKeyIsAutoIncrementByDefault) tableField.AutoIncrement = true;
                             break;
                         case nameof(ForeignKeyAttribute):
                             break;
@@ -372,27 +374,27 @@ namespace Dapper.TQuery
 
             return sqlCommands.Join(Environment.NewLine);
         }
-        private static string CreateIfNotExistsSql<T>(this TQuery<T> tQuery)
+        private static string CreateIfNotExistsSql<T>(this IDbEc<T> dbEcQuery)
         {
-            return $"IF OBJECT_ID('{tQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(tQuery)};";
+            return $"IF OBJECT_ID('{dbEcQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(dbEcQuery)};";
         }
-        private static string CreateIfNotExistsSql(this TQueryable tQuery)
+        private static string CreateIfNotExistsSql(this DbEc dbEcQuery)
         {
-            return $"IF OBJECT_ID('{tQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(tQuery)};";
+            return $"IF OBJECT_ID('{dbEcQuery.TableName}', 'U') IS NULL {Environment.NewLine}{CreateSql(dbEcQuery)};";
         }
-        private static string DropSql<T>(this TQuery<T> tQuery)
+        private static string DropSql<T>(this IDbEc<T> dbEcQuery)
         {
-            var table = tQuery.TableName;
-            var props = tQuery.TableType.GetProperties().ToList();
+            var table = dbEcQuery.TableName;
+            var props = dbEcQuery.TableType.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
             return $"DROP TABLE {table} ;{Environment.NewLine}";
         }
 
-        private static string DropSql(this TQueryable tQuery)
+        private static string DropSql(this DbEc dbEcQuery)
         {
-            var table = tQuery.TableName;
-            var props = tQuery.TableType.GetProperties().ToList();
+            var table = dbEcQuery.TableName;
+            var props = dbEcQuery.TableType.GetProperties().ToList();
             List<string> fields = new List<string>();
             foreach (PropertyInfo field in props) { fields.Add(field.Name + " " + field.PropertyType.ToSqlDbTypeInternal()); }
             return $"DROP TABLE {table} ;{Environment.NewLine}";
@@ -402,10 +404,10 @@ namespace Dapper.TQuery
         /// Creates all Tables on the server database, based on the code classes with [Table] attribute.
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to perform the Create All Tables command.
         /// </param>
-        public static void CreateAllTables(this TQueryDatabase tQuery)
+        public static void CreateAllTables(this IDbEcDatabase dbEcQuery)
         {
             List<Type> types = new List<Type>();
             foreach (Type type in Assembly
@@ -417,23 +419,23 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.CreateSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.CreateSql() + Environment.NewLine;
             }
-            tQuery.SqlConnection.Execute(tQuery.SqlString);
+            dbEcQuery.SqlConnection.Execute(dbEcQuery.SqlString);
         }
 
         /// <summary>
         /// Creates all Tables on the server database, based on the code classes with [Table] attribute.
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabaseExtended"/> to perform the Create All Tables command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will create all Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
         /// </returns>
-        public static TQueryDatabaseExtended CreateAllTables(this TQueryDatabaseExtended tQuery)
+        public static IDbEcDatabaseExtended CreateAllTables(this IDbEcDatabaseExtended dbEcQuery)
         {
             List<Type> types = new List<Type>();
             foreach (Type type in Assembly
@@ -445,20 +447,20 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.CreateSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.CreateSql() + Environment.NewLine;
             }
-            return tQuery;
+            return dbEcQuery;
         }
 
         /// <summary>
         /// Checks each table if exists on the database, and creates the non-exists Tables on the server database, based on the code classes with [Table] attribute.
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to perform the Create All Tables command.
         /// </param>
-        public static void CreateAllTablesIfNotExists(this TQueryDatabase tQuery)
+        public static void CreateAllTablesIfNotExists(this IDbEcDatabase dbEcQuery)
         {
             List<Type> types = new List<Type>();
             foreach (Type type in Assembly
@@ -470,23 +472,23 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.CreateIfNotExistsSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.CreateIfNotExistsSql() + Environment.NewLine;
             }
-            tQuery.SqlConnection.Execute(tQuery.SqlString);
+            dbEcQuery.SqlConnection.Execute(dbEcQuery.SqlString);
         }
 
         /// <summary>
         /// Checks each table if exists on the database, and creates the non-exists Tables on the server database, based on the code classes with [Table] attribute.
         /// Supported attributes are: [Key] for Primary Key, [AutoIncrement] for Auto Increment property, [Required] for Not Null property.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabaseExtended"/> to perform the Create All Tables command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will create all non-exists Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Create All Tables command.
         /// </returns>
-        public static TQueryDatabaseExtended CreateAllTablesIfNotExists(this TQueryDatabaseExtended tQuery)
+        public static IDbEcDatabaseExtended CreateAllTablesIfNotExists(this IDbEcDatabaseExtended dbEcQuery)
         {
             List<Type> types = new List<Type>();
             foreach (Type type in Assembly
@@ -498,19 +500,19 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.CreateIfNotExistsSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.CreateIfNotExistsSql() + Environment.NewLine;
             }
-            return tQuery;
+            return dbEcQuery;
         }
 
         /// <summary>
         /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to perform the Drop All Tables command.
         /// </param>
-        public static int DropAllTables(this TQueryDatabase tQuery)
+        public static int DropAllTables(this IDbEcDatabase dbEcQuery)
         {
             List<Type> types = new List<Type>();
 
@@ -523,22 +525,22 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.DropSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.DropSql() + Environment.NewLine;
             }
-            return tQuery.SqlConnection.Execute(tQuery.SqlString);
+            return dbEcQuery.SqlConnection.Execute(dbEcQuery.SqlString);
         }
 
         /// <summary>
         /// Removes all Tables on the server database, based on the code classes with [Table] attribute.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to perform the Drop All Tables command.
         /// </param>
         /// <returns>
         /// An <see cref="TQueryDatabaseExtended"/> instance, which the SQL command will remove all Tables on the database, and <see cref="TQueryExecute{T}.Execute"/> will execute the Drop All Tables command.
         /// </returns>
-        public static TQueryDatabaseExtended DropAllTables(this TQueryDatabaseExtended tQuery)
+        public static IDbEcDatabaseExtended DropAllTables(this IDbEcDatabaseExtended dbEcQuery)
         {
             List<Type> types = new List<Type>();
 
@@ -551,33 +553,33 @@ namespace Dapper.TQuery
 
             foreach (var t in types)
             {
-                TQueryable query = new TQueryable(t, tQuery.SqlDialect);
-                tQuery.SqlString += query.DropSql() + Environment.NewLine;
+                DbEc query = new DbEc(t, dbEcQuery.SqlDialect);
+                dbEcQuery.SqlString += query.DropSql() + Environment.NewLine;
             }
-            return tQuery;
+            return dbEcQuery;
         }
 
         /// <summary>
         /// Returns a list of all table defenitions from the server database.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to get all database tables and their fields.
         /// </param>
         /// <returns>
         /// An <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> which the Key is the table name, and the Value is an Dynamic Class as an <see cref="System.Dynamic.DynamicObject"/> including the table defenition, fields, and attributes. 
         /// </returns>
-        public static Dictionary<string, object> GetAllServerDbTablesType(this TQueryDatabase tQuery)
+        public static Dictionary<string, object> GetAllServerDbTablesType(this IDbEcDatabase dbEcQuery)
         {
-            tQuery.SqlConnection.Open();
-            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
-            tQuery.SqlConnection.Close();
+            dbEcQuery.SqlConnection.Open();
+            DataTable t = dbEcQuery.SqlConnection.GetSchema("Tables");
+            dbEcQuery.SqlConnection.Close();
             var tables = new Dictionary<string, object>();
             foreach (DataRow row in t.Rows)
             {
                 string table = (string)row[2];
-                tQuery.SqlConnection.Open();
-                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
-                tQuery.SqlConnection.Close();
+                dbEcQuery.SqlConnection.Open();
+                var dtCols = dbEcQuery.SqlConnection.GetSchema("Columns", new[] { dbEcQuery.SqlConnection.Database, null, table });
+                dbEcQuery.SqlConnection.Close();
                 var fields = new List<Field>();
                 foreach (DataRow field in dtCols.Rows)
                 {
@@ -592,17 +594,17 @@ namespace Dapper.TQuery
         /// <summary>
         /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to compare the server database with all tables on the code classes.  
         /// </param>
         /// <returns>
         /// True if all tables, fields, and properties on the server database matches the code classes with [Table] attribute. Otherwise, returns false.
         /// </returns>
-        public static bool IsEqualServerDbToCodeDb(this TQueryDatabase tQuery)
+        public static bool IsEqualServerDbToCodeDb(this IDbEcDatabase dbEcQuery)
         {
-            tQuery.SqlConnection.Open();
-            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
-            tQuery.SqlConnection.Close();
+            dbEcQuery.SqlConnection.Open();
+            DataTable t = dbEcQuery.SqlConnection.GetSchema("Tables");
+            dbEcQuery.SqlConnection.Close();
             var types = new List<Type>();
             var tables = new List<string>();
             foreach (Type type in Assembly
@@ -617,9 +619,9 @@ namespace Dapper.TQuery
             {
                 string table = (string)row[2];
                 tables.Add(table);
-                tQuery.SqlConnection.Open();
-                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
-                tQuery.SqlConnection.Close();
+                dbEcQuery.SqlConnection.Open();
+                var dtCols = dbEcQuery.SqlConnection.GetSchema("Columns", new[] { dbEcQuery.SqlConnection.Database, null, table });
+                dbEcQuery.SqlConnection.Close();
                 var typeProps = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
                 var tableProps = new Dictionary<string, Type>();
                 foreach (DataRow field in dtCols.Rows)
@@ -647,17 +649,17 @@ namespace Dapper.TQuery
         /// <summary>
         /// Compares the server database and the code classes with [Table] attribute, checks each table and their fields and properties.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryDatabase"/> to compare the server database with all tables on the code classes.  
         /// </param>
         /// <returns>
         /// An list of <see cref="CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
         /// </returns>
-        public static List<CompareDb> GetDiffServerDbToCodeDb(this TQueryDatabase tQuery)
+        public static List<CompareDb> GetDiffServerDbToCodeDb(this IDbEcDatabase dbEcQuery)
         {
-            tQuery.SqlConnection.Open();
-            DataTable t = tQuery.SqlConnection.GetSchema("Tables");
-            tQuery.SqlConnection.Close();
+            dbEcQuery.SqlConnection.Open();
+            DataTable t = dbEcQuery.SqlConnection.GetSchema("Tables");
+            dbEcQuery.SqlConnection.Close();
             var types = new List<Type>();
             var tables = new List<string>();
             foreach (Type type in Assembly
@@ -673,9 +675,9 @@ namespace Dapper.TQuery
             {
                 string table = (string)row[2];
                 tables.Add(table);
-                tQuery.SqlConnection.Open();
-                var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, table });
-                tQuery.SqlConnection.Close();
+                dbEcQuery.SqlConnection.Open();
+                var dtCols = dbEcQuery.SqlConnection.GetSchema("Columns", new[] { dbEcQuery.SqlConnection.Database, null, table });
+                dbEcQuery.SqlConnection.Close();
                 var typeProps = types.FirstOrDefault(x => x.Name == table).GetProperties().ToList();
                 var tableProps = new Dictionary<string, Type>();
                 foreach (DataRow field in dtCols.Rows)
@@ -707,18 +709,18 @@ namespace Dapper.TQuery
         /// Compares the server table and the code class with that table name, checks each field and their properties.
         /// </summary>
         /// <typeparam name="Table">The type of the records of table class. need to be a class with the [Table("")] attribute.</typeparam>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> to perform the Drop Table command.
         /// </param>
         /// <returns>
         /// An list of <see cref="TQueryTableExtensions.CompareDb"/> objects, which includes all differences between the server database and the code classes with [Table] attribute.
         /// </returns>
-        public static List<CompareDb> GetDiffServerTableToCodeTable<Table>(this TQueryable<Table> tQuery)
+        public static List<CompareDb> GetDiffServerTableToCodeTable<Table>(this DbEc<Table> dbEcQuery)
         {
             var diff = new List<CompareDb>();
-            tQuery.SqlConnection.Open();
-            var dtCols = tQuery.SqlConnection.GetSchema("Columns", new[] { tQuery.SqlConnection.Database, null, typeof(Table).Name });
-            tQuery.SqlConnection.Close();
+            dbEcQuery.SqlConnection.Open();
+            var dtCols = dbEcQuery.SqlConnection.GetSchema("Columns", new[] { dbEcQuery.SqlConnection.Database, null, typeof(Table).Name });
+            dbEcQuery.SqlConnection.Close();
             var typeProps = typeof(Table).GetProperties().ToList();
             var tableProps = new Dictionary<string, Type>();
             foreach (DataRow field in dtCols.Rows)
@@ -773,119 +775,119 @@ namespace Dapper.TQuery
             }
         }
 
-        //public static TQueryable<Table> Distinct<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> Distinct<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
-        //public static TQueryable<Table> Union<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> Union<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
 
         //TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcGroup<Table> GroupBy<Table, TKey>(this DbEc<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    //if (tQuery.EmptyQuery == null) { tQuery.EmptyQuery = Enumerable.Empty<Table>().AsQueryable(); }
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    //if (dbEcQuery.EmptyQuery == null) { dbEcQuery.EmptyQuery = Enumerable.Empty<Table>().AsQueryable(); }
+        //    dbEcQuery.EmptyQuery = dbEcQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery);
+        //    DbEcGroup<Table> _groupedQuery = new DbEcGroup<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _groupedQuery;
         //}
         ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryableFilter<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcGroup<Table> GroupBy<Table, TKey>(this DbEcFilter<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.EmptyQuery = dbEcQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery);
+        //    DbEcGroup<Table> _groupedQuery = new DbEcGroup<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _groupedQuery;
         //}
         ////TODO What is the return for GroupBy ??? the linq lib has two types with diff arg. Check it out deeply.
-        //public static TQueryableGroup<Table> GroupBy<Table, TKey>(this TQueryableOrder<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcGroup<Table> GroupBy<Table, TKey>(this DbEcOrder<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.EmptyQuery = tQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery);
-        //    TQueryableGroup<Table> _groupedQuery = new TQueryableGroup<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.EmptyQuery = dbEcQuery.EmptyQuery.GroupBy(predicate).SelectMany(x => x);
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery);
+        //    DbEcGroup<Table> _groupedQuery = new DbEcGroup<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _groupedQuery;
         //}
 
-        //public static TQueryableJoin<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this TQueryable<TOuter> outer, TQueryable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector)
+        //public static DbEcJoin<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this DbEc<TOuter> outer, DbEc<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, TResult>> resultSelector)
         //{
         //    if (outer.EmptyQuery == null) { outer.EmptyQuery = Enumerable.Empty<TOuter>().AsQueryable(); }
         //    IQueryable<TResult> empty = outer.EmptyQuery.Join(Enumerable.Empty<TInner>().AsQueryable(), outerKeySelector, innerKeySelector, resultSelector).AsQueryable();
         //    outer.SqlString = new ExpressionToSQL(empty, outer.EmptyQuery.GroupBy(outerKeySelector).Expression, "JOIN");
-        //    TQueryableJoin<TResult> _JoinQuery = new TQueryableJoin<TResult>() { SqlConnection = outer.SqlConnection, EmptyQuery = empty, SqlString = outer.SqlString };
+        //    DbEcJoin<TResult> _JoinQuery = new DbEcJoin<TResult>() { SqlConnection = outer.SqlConnection, EmptyQuery = empty, SqlString = outer.SqlString };
         //    return _JoinQuery;
         //}
 
-        //public static TQueryable<Table> Contains<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> Contains<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
-        //public static TQueryable<Table> Aggregate<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> Aggregate<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
-        //public static TQueryableCalc<Table> Count<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcCalc<Table> Count<Table, TKey>(this DbEc<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Count(predicate));
-        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery, ExpressionToSQL.Count(predicate));
+        //    DbEcCalc<Table> _calcQuery = new DbEcCalc<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _calcQuery;
         //}
-        //public static TQueryableCount<Table> Count<Table>(this TQueryable<Table> tQuery)
+        //public static DbEcCount<Table> Count<Table>(this DbEc<Table> dbEcQuery)
         //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.RecCount(0));
-        //    TQueryableCount<Table> _calcQuery = new TQueryableCount<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery, ExpressionToSQL.RecCount(0));
+        //    DbEcCount<Table> _calcQuery = new DbEcCount<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _calcQuery;
         //}
-        //public static TQueryableCalc<Table> Average<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcCalc<Table> Average<Table, TKey>(this DbEc<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Average(predicate));
-        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery, ExpressionToSQL.Average(predicate));
+        //    DbEcCalc<Table> _calcQuery = new DbEcCalc<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _calcQuery;
         //}
-        //public static TQueryableCalc<Table> Max<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcCalc<Table> Max<Table, TKey>(this DbEc<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Max(predicate));
-        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery, ExpressionToSQL.Max(predicate));
+        //    DbEcCalc<Table> _calcQuery = new DbEcCalc<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _calcQuery;
         //}
-        //public static TQueryableCalc<Table> Sum<Table, TKey>(this TQueryable<Table> tQuery, Expression<Func<Table, TKey>> predicate)
+        //public static DbEcCalc<Table> Sum<Table, TKey>(this DbEc<Table> dbEcQuery, Expression<Func<Table, TKey>> predicate)
         //{
-        //    tQuery.SqlString = new ExpressionToSQL(tQuery.EmptyQuery, ExpressionToSQL.Sum(predicate));
-        //    TQueryableCalc<Table> _calcQuery = new TQueryableCalc<Table>() { SqlConnection = tQuery.SqlConnection, EmptyQuery = tQuery.EmptyQuery, SqlString = tQuery.SqlString };
+        //    dbEcQuery.SqlString = new ExpressionToSQL(dbEcQuery.EmptyQuery, ExpressionToSQL.Sum(predicate));
+        //    DbEcCalc<Table> _calcQuery = new DbEcCalc<Table>() { SqlConnection = dbEcQuery.SqlConnection, EmptyQuery = dbEcQuery.EmptyQuery, SqlString = dbEcQuery.SqlString };
         //    return _calcQuery;
         //}
-        //public static TQueryable<Table> ElementAt<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> ElementAt<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
-        //public static TQueryable<Table> ElementAtOrDefault<Table>(this TQueryable<Table> tQuery, Func<Table> predicate)
+        //public static DbEc<Table> ElementAtOrDefault<Table>(this DbEc<Table> dbEcQuery, Func<Table> predicate)
         //{
 
-        //    return tQuery;
+        //    return dbEcQuery;
         //}
 
-        //public static TQueryCreate DropExtraTableColumns<Table>(this TQueryable<Table> tQuery)
+        //public static IDbEcCreate DropExtraTableColumns<Table>(this DbEc<Table> dbEcQuery)
         //{
         //    //check if is missing columns
         //    //
         //}
-        //public static TQueryCreate AddMissingTableColumns<Table>(this TQueryable<Table> tQuery)
+        //public static IDbEcCreate AddMissingTableColumns<Table>(this DbEc<Table> dbEcQuery)
         //{
         //    //check if is missing columns
         //    //
         //}
-        //public static TQueryCreate ModifyTableColumnsDataType<Table>(this TQueryable<Table> tQuery)
+        //public static IDbEcCreate ModifyTableColumnsDataType<Table>(this DbEc<Table> dbEcQuery)
         //{
         //    //check if is missing columns
         //    //
         //}
-        //public static TQueryCreate RenameTableColumns<Table>(this TQueryable<Table> tQuery)
+        //public static IDbEcCreate RenameTableColumns<Table>(this DbEc<Table> dbEcQuery)
         //{
         //    //check if is missing columns
         //    //

@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlClient;
 using System.Reflection;
-using static Dapper.TQuery.TQueryExceptions;
+using static DbEasyConnect.Tools.DbEcExceptions;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect
 {
     /// <summary>
     /// The start point of using this library.
     /// <br/>
-    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with TQuery method extensions.
+    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with IDbEc method extensions.
     /// Or <see cref="TQueryableExtended{T}"/> instanse, for more advanced options.
     /// <br/>
-    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with TQuery method extensions.
+    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with IDbEc method extensions.
     /// Or <see cref="TQueryDatabaseExtended"/> instanse, for more advanced options.
     /// </summary>
-    public static class TQueryStartExtensions
+    public static class InitExtensions
     {
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
@@ -29,15 +29,15 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQuery<Table>(this SqlConnection sqlConnection)
+        public static DbEc<Table> IDbEc<Table>(this SqlConnection sqlConnection)
         {
-            SqlDialect sqlDialect = TQueryDefaults.SqlDialect;
+            SqlDialect sqlDialect = DbEcDefaults.SqlDialect;
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            TQueryable<Table> query = new TQueryable<Table>(sqlConnection, sqlDialect);
+            DbEc<Table> query = new DbEc<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -55,14 +55,14 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQuery<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static DbEc<Table> IDbEc<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            TQueryable<Table> query = new TQueryable<Table>(sqlConnection, sqlDialect);
+            DbEc<Table> query = new DbEc<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -77,15 +77,15 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtended<Table>(this SqlConnection sqlConnection)
+        public static DbEcExtended<Table> IDbEcExtended<Table>(this SqlConnection sqlConnection)
         {
-            SqlDialect sqlDialect = TQueryDefaults.SqlDialect;
+            SqlDialect sqlDialect = DbEcDefaults.SqlDialect;
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -103,16 +103,16 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtended<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static DbEcExtended<Table> IDbEcExtended<Table>(this SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
             
                 
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -124,13 +124,13 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDb(this SqlConnection sqlConnection)
+        public static IDbEcDatabase IDbEcDb(this SqlConnection sqlConnection)
         {
-            SqlDialect sqlDialect = TQueryDefaults.SqlDialect;
-            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            SqlDialect sqlDialect = DbEcDefaults.SqlDialect;
+            IDbEcDatabase query = new IDbEcDatabase(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -145,12 +145,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDb(this SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static IDbEcDatabase IDbEcDb(this SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
-            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            IDbEcDatabase query = new IDbEcDatabase(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -163,13 +163,13 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtended(this SqlConnection sqlConnection)
+        public static IDbEcDatabaseExtended IDbEcDbExtended(this SqlConnection sqlConnection)
         {
-            SqlDialect sqlDialect = TQueryDefaults.SqlDialect;
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(sqlConnection, sqlDialect);
+            SqlDialect sqlDialect = DbEcDefaults.SqlDialect;
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -184,21 +184,21 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtended(this SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static IDbEcDatabaseExtended IDbEcDbExtended(this SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(sqlConnection, sqlDialect);
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(sqlConnection, sqlDialect);
             return query;
         }
 
 
 
         /// <summary>
-        /// Modifies manually the TQuery SQL command with any given string.<br/>
+        /// Modifies manually the IDbEc SQL command with any given string.<br/>
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> that contains the queryable table to apply the predicate to.
         /// </param>
         /// <param name="sql"> A given string for SQL command.
@@ -206,17 +206,17 @@ namespace Dapper.TQuery
         /// <returns>
         /// An <see cref="TQueryableExtended{T}"/> instanse with the updated SQL command.
         /// </returns>
-        public static TQueryableExtended<Table> ModifySqlString<Table>(this TQueryableExtended<Table> tQuery, string sql)
+        public static DbEcExtended<Table> ModifySqlString<Table>(this DbEcExtended<Table> dbEcQuery, string sql)
         {
-            tQuery.SqlString = sql;
-            return tQuery;
+            dbEcQuery.SqlString = sql;
+            return dbEcQuery;
         }
 
         /// <summary>
-        /// Replaces parts of the TQuery SQL command.<br/>
+        /// Replaces parts of the IDbEc SQL command.<br/>
         /// Use this method to replace any part of the SQL string according to the Database language.
         /// </summary>
-        /// <param name="tQuery">
+        /// <param name="dbEcQuery">
         /// An <see cref="TQueryable{T}"/> that contains the queryable table to apply the predicate to.
         /// </param>
         /// <param name="oldValue">Old value</param>
@@ -224,10 +224,10 @@ namespace Dapper.TQuery
         /// <returns>
         /// An <see cref="TQueryableExtended{T}"/> instanse with the updated SQL command.
         /// </returns>
-        public static TQueryableExtended<Table> ReplaceInSqlString<Table>(this TQueryableExtended<Table> tQuery, String oldValue, String newValue)
+        public static DbEcExtended<Table> ReplaceInSqlString<Table>(this DbEcExtended<Table> dbEcQuery, String oldValue, String newValue)
         {
-            tQuery.SqlString = tQuery.SqlString.Replace(oldValue, newValue);
-            return tQuery;
+            dbEcQuery.SqlString = dbEcQuery.SqlString.Replace(oldValue, newValue);
+            return dbEcQuery;
         }
 
     }
@@ -235,13 +235,13 @@ namespace Dapper.TQuery
     /// <summary>
     /// The start point of using this library.
     /// <br/>
-    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with TQuery method extensions.
+    /// Initialize a new <see cref="TQueryable{T}"/> instanse, to query and/or modify the table with IDbEc method extensions.
     /// Or <see cref="TQueryableExtended{T}"/> instanse, for more advanced options.
     /// <br/>
-    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with TQuery method extensions.
+    /// Initialize a new <see cref="TQueryDatabase"/> instanse, to modify the Database table defenitions with IDbEc method extensions.
     /// Or <see cref="TQueryDatabaseExtended"/> instanse, for more advanced options.
     /// </summary>
-    public static class TQueryStartMethods
+    public static class IDbEcStartMethods
     {
         //TODO add Exception for wrong type selection, type that does not have a Table attribute.
         /// <summary>
@@ -254,14 +254,14 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQueryInit<Table>(SqlConnection sqlConnection)
+        public static DbEc<Table> IDbEcInit<Table>(SqlConnection sqlConnection)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
-            TQueryable<Table> query = new TQueryable<Table>(sqlConnection, TQueryDefaults.SqlDialect);
+            DbEc<Table> query = new DbEc<Table>(sqlConnection, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -276,16 +276,16 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(SqlConnection sqlConnection)
+        public static DbEcExtended<Table> IDbEcExtendedInit<Table>(SqlConnection sqlConnection)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
             
                 
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, TQueryDefaults.SqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(sqlConnection, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -297,12 +297,12 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbInit(SqlConnection sqlConnection)
+        public static IDbEcDatabase IDbEcDbInit(SqlConnection sqlConnection)
         {
-            TQueryDatabase query = new TQueryDatabase(sqlConnection, TQueryDefaults.SqlDialect);
+            IDbEcDatabase query = new IDbEcDatabase(sqlConnection, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -314,12 +314,12 @@ namespace Dapper.TQuery
         /// The SqlConnection to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtendedInit(SqlConnection sqlConnection)
+        public static IDbEcDatabaseExtended IDbEcDbExtendedInit(SqlConnection sqlConnection)
         {
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(sqlConnection, TQueryDefaults.SqlDialect);
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(sqlConnection, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -334,12 +334,12 @@ namespace Dapper.TQuery
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQueryInit<Table>(string connectionString)
+        public static DbEc<Table> IDbEcInit<Table>(string connectionString)
         {
-            TQueryable<Table> query = new TQueryable<Table>(connectionString, TQueryDefaults.SqlDialect);
+            DbEc<Table> query = new DbEc<Table>(connectionString, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -354,12 +354,12 @@ namespace Dapper.TQuery
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(string connectionString)
+        public static DbEcExtended<Table> IDbEcExtendedInit<Table>(string connectionString)
         {
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(connectionString, TQueryDefaults.SqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(connectionString, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -371,12 +371,12 @@ namespace Dapper.TQuery
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbInit(string connectionString)
+        public static IDbEcDatabase IDbEcDbInit(string connectionString)
         {
-            TQueryDatabase query = new TQueryDatabase(connectionString, TQueryDefaults.SqlDialect);
+            IDbEcDatabase query = new IDbEcDatabase(connectionString, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -388,12 +388,12 @@ namespace Dapper.TQuery
         /// The connection string to be used to connect to the Server Database.
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtendedInit(string connectionString)
+        public static IDbEcDatabaseExtended IDbEcDbExtendedInit(string connectionString)
         {
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(connectionString, TQueryDefaults.SqlDialect);
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(connectionString, DbEcDefaults.SqlDialect);
             return query;
         }
 
@@ -413,16 +413,16 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQueryInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static DbEc<Table> IDbEcInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
             
                 
-            TQueryable<Table> query = new TQueryable<Table>(sqlConnection, sqlDialect);
+            DbEc<Table> query = new DbEc<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -441,16 +441,16 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static DbEcExtended<Table> IDbEcExtendedInit<Table>(SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
             if (Attribute.IsDefined(typeof(Table), typeof(TableAttribute)) == false)
                 throw new MissingTableAttributeException(typeof(Table));
             
                 
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(sqlConnection, sqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -466,12 +466,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static IDbEcDatabase IDbEcDbInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
-            TQueryDatabase query = new TQueryDatabase(sqlConnection, sqlDialect);
+            IDbEcDatabase query = new IDbEcDatabase(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -487,12 +487,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtendedInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
+        public static IDbEcDatabaseExtended IDbEcDbExtendedInit(SqlConnection sqlConnection, SqlDialect sqlDialect)
         {
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(sqlConnection, sqlDialect);
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(sqlConnection, sqlDialect);
             return query;
         }
 
@@ -511,12 +511,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions.
+        /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryable<Table> TQueryInit<Table>(string connectionString, SqlDialect sqlDialect)
+        public static DbEc<Table> IDbEcInit<Table>(string connectionString, SqlDialect sqlDialect)
         {
-            TQueryable<Table> query = new TQueryable<Table>(connectionString, sqlDialect);
+            DbEc<Table> query = new DbEc<Table>(connectionString, sqlDialect);
             return query;
         }
 
@@ -535,12 +535,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the table with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryableExtended<Table> TQueryExtendedInit<Table>(string connectionString, SqlDialect sqlDialect)
+        public static DbEcExtended<Table> IDbEcExtendedInit<Table>(string connectionString, SqlDialect sqlDialect)
         {
-            TQueryableExtended<Table> query = new TQueryableExtended<Table>(connectionString, sqlDialect);
+            DbEcExtended<Table> query = new DbEcExtended<Table>(connectionString, sqlDialect);
             return query;
         }
 
@@ -556,12 +556,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions.
+        /// An <see cref="TQueryDatabase"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions.
         /// </returns>
         ///         
-        public static TQueryDatabase TQueryDbInit(string connectionString, SqlDialect sqlDialect)
+        public static IDbEcDatabase IDbEcDbInit(string connectionString, SqlDialect sqlDialect)
         {
-            TQueryDatabase query = new TQueryDatabase(connectionString, sqlDialect);
+            IDbEcDatabase query = new IDbEcDatabase(connectionString, sqlDialect);
             return query;
         }
 
@@ -577,12 +577,12 @@ namespace Dapper.TQuery
         /// these are all different databases that have their own slightly different SQL dialects. 
         /// </param>
         /// <returns>
-        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+        /// An <see cref="TQueryDatabaseExtended"/> instanse which will be used to modify the Database table defenitions with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
         /// </returns>
         ///         
-        public static TQueryDatabaseExtended TQueryDbExtendedInit(string connectionString, SqlDialect sqlDialect)
+        public static IDbEcDatabaseExtended IDbEcDbExtendedInit(string connectionString, SqlDialect sqlDialect)
         {
-            TQueryDatabaseExtended query = new TQueryDatabaseExtended(connectionString, sqlDialect);
+            IDbEcDatabaseExtended query = new IDbEcDatabaseExtended(connectionString, sqlDialect);
             return query;
         }
 

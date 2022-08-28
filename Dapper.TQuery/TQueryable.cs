@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Dapper;
+using DbEasyConnect.Tools;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
@@ -7,9 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect
 {
-    public static class TQueryDefaults
+    public static class DbEcDefaults
     {
         /// <summary>
         /// The relevant <see cref="SqlDialect"/> for the current database. Available options: SQL Server, MySQL, Oracle, SQLite, and PostgreSQL.
@@ -25,7 +27,7 @@ namespace Dapper.TQuery
 
     }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public abstract class TQuery<T>
+    public abstract class IDbEc<T>
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         internal SqlConnection SqlConnection { get; set; }
@@ -36,7 +38,7 @@ namespace Dapper.TQuery
         internal Type TableType { get; set; }
     }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public abstract class TQueryGet<T> : TQuery<T>
+    public abstract class IDbEcGet<T> : IDbEc<T>
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         /// <summary>
@@ -91,22 +93,22 @@ namespace Dapper.TQuery
             return SqlConnection.QueryAsync<T>(SqlString);
         }
         /// <summary>
-        /// Returns the TQuery generated Sql command.<br/>
-        /// To modify the Sql command manually, use the TQueryExtended method,
+        /// Returns the IDbEc generated Sql command.<br/>
+        /// To modify the Sql command manually, use the IDbEcExtended method,
         /// and then use the <see cref="TQueryStartExtensions.ModifySqlString{Table}(TQueryableExtended{Table}, string)"/> method.
         /// </summary>
-        /// <returns> TQuery generated Sql command as a String.</returns>
+        /// <returns> IDbEc generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
         }
     }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public abstract class TQueryExecute<T> : TQuery<T>
+    public abstract class IDbEcExecute<T> : IDbEc<T>
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         /// <summary>
-        /// Execute TQuery SQL command.
+        /// Execute IDbEc SQL command.
         /// </summary>
         /// <returns>The number of rows affected.</returns>
         public int Execute()
@@ -114,7 +116,7 @@ namespace Dapper.TQuery
             return SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute TQuery SQL command asynchronously using Task.
+        /// Execute IDbEc SQL command asynchronously using Task.
         /// </summary>
         /// <returns>The number of rows affected.</returns>
         public Task<int> ExecuteAsync()
@@ -122,11 +124,11 @@ namespace Dapper.TQuery
             return SqlConnection.ExecuteAsync(SqlString);
         }
         /// <summary>
-        /// Returns the TQuery generated Sql command.<br/>
-        /// To modify the Sql command manually, use the TQueryExtended method,
+        /// Returns the IDbEc generated Sql command.<br/>
+        /// To modify the Sql command manually, use the IDbEcExtended method,
         /// and then use the ModifySqlString or ReplaceInSqlString method.
         /// </summary>
-        /// <returns> TQuery generated Sql command as a String.</returns>
+        /// <returns> IDbEc generated Sql command as a String.</returns>
         public string ToSqlString()
         {
             return SqlString;
@@ -136,9 +138,9 @@ namespace Dapper.TQuery
     /// An <see cref="TQueryable{T}"/> instanse which will be used to query and/or modify the Database with Dapper.TQuery method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryable<T> : TQueryGet<T>
+    public class DbEc<T> : IDbEcGet<T>
     {
-        internal TQueryable(string ConnectionString, SqlDialect sqlDialect)
+        internal DbEc(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             this.SqlDialect = sqlDialect;
@@ -148,15 +150,15 @@ namespace Dapper.TQuery
             }
             this.TableType = typeof(T);
             this.TableName = typeof(T).Name + "s";
-            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(DbEcDefaults.Schema))
             {
                 string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
-                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : DbEcDefaults.Schema;
                 this.TableName = $"{schema}.{this.TableName}";
             }
             else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
-        internal TQueryable(SqlConnection SqlConnection, SqlDialect sqlDialect)
+        internal DbEc(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
             this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
@@ -166,29 +168,29 @@ namespace Dapper.TQuery
             }
             this.TableType = typeof(T);
             this.TableName = typeof(T).Name + "s";
-            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(DbEcDefaults.Schema))
             {
                 string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
-                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : DbEcDefaults.Schema;
                 this.TableName = $"{schema}.{this.TableName}";
             }
             else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
     }
-    internal class TQueryable
+    internal class DbEc
     {
         internal SqlDialect SqlDialect { get; set; }
         internal string TableName { get; set; }
         internal Type TableType { get; set; }
-        internal TQueryable(Type type, SqlDialect sqlDialect)
+        internal DbEc(Type type, SqlDialect sqlDialect)
         {
             this.SqlDialect = sqlDialect;
             this.TableType = type;
             this.TableName = type.Name + "s";
-            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(DbEcDefaults.Schema))
             {
                 string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
-                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : DbEcDefaults.Schema;
                 this.TableName = $"{schema}.{this.TableName}";
             }
             else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
@@ -196,12 +198,12 @@ namespace Dapper.TQuery
     }
 
     /// <summary>
-    /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the Database with TQuery method extensions with advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+    /// An <see cref="TQueryableExtended{T}"/> instanse which will be used to query and/or modify the Database with IDbEc method extensions with advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableExtended<T> : TQueryGet<T>
+    public class DbEcExtended<T> : IDbEcGet<T>
     {
-        internal TQueryableExtended(string ConnectionString, SqlDialect sqlDialect)
+        internal DbEcExtended(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             if (EmptyQuery == null)
@@ -210,15 +212,15 @@ namespace Dapper.TQuery
             }
             this.TableType = typeof(T);
             this.TableName = typeof(T).Name + "s";
-            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(DbEcDefaults.Schema))
             {
                 string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
-                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : DbEcDefaults.Schema;
                 this.TableName = $"{schema}.{this.TableName}";
             }
             else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
         }
-        internal TQueryableExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
+        internal DbEcExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
             this.SqlConnection = SqlConnection;
             if (EmptyQuery == null)
@@ -227,10 +229,10 @@ namespace Dapper.TQuery
             }
             this.TableType = typeof(T);
             this.TableName = typeof(T).Name + "s";
-            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(TQueryDefaults.Schema))
+            if (TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 || !string.IsNullOrEmpty(DbEcDefaults.Schema))
             {
                 string schema = TableType.GetCustomAttribute<TableAttribute>().Schema?.Length > 0 ?
-                    TableType.GetCustomAttribute<TableAttribute>().Schema : TQueryDefaults.Schema;
+                    TableType.GetCustomAttribute<TableAttribute>().Schema : DbEcDefaults.Schema;
                 this.TableName = $"{schema}.{this.TableName}";
             }
             else { this.TableName = TableType.GetCustomAttribute<TableAttribute>().Name; }
@@ -240,35 +242,35 @@ namespace Dapper.TQuery
     /// An <see cref="TQueryableSelect{T}"/> instanse which will be used for the 'Select' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableSelect<T> : TQueryGet<T> { }
+    public class DbEcSelect<T> : IDbEcGet<T> { }
     /// <summary>
     /// An <see cref="TQueryableOrder{T}"/> instanse which will be used for the 'Order' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableOrder<T> : TQueryGet<T> { }
+    public class DbEcOrder<T> : IDbEcGet<T> { }
     /// <summary>
     /// An <see cref="TQueryableUpdate{T}"/> instanse which will be used for the 'Update' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableUpdate<T> : TQueryExecute<T> { }
+    public class DbEcUpdate<T> : IDbEcExecute<T> { }
     /// <summary>
     /// An <see cref="TQueryableDelete{T}"/> instanse which will be used for the 'Delete' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableDelete<T> : TQueryExecute<T> { }
+    public class DbEcDelete<T> : IDbEcExecute<T> { }
     /// <summary>
     /// An <see cref="TQueryableCreate{T}"/> instanse which will be used for all 'Create/Modify/Delete Table' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableCreate<T> : TQueryExecute<T> { }
+    public class DbEcCreate<T> : IDbEcExecute<T> { }
     /// <summary>
     /// An <see cref="TQueryableBool{T}"/> instanse which will be used for the 'Boolean' method extensions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TQueryableBool<T> : TQuery<T>
+    public class DbEcBool<T> : IDbEc<T>
     {
         /// <summary>
-        /// Execute TQuery SQL boolean command and returns true or false.
+        /// Execute IDbEc SQL boolean command and returns true or false.
         /// </summary>
         /// <returns> True if the command result is true, otherwise returns false.</returns>
         public bool Execute()
@@ -276,7 +278,7 @@ namespace Dapper.TQuery
             return SqlConnection.ExecuteScalar<bool>(SqlString);
         }
         /// <summary>
-        /// Execute TQuery SQL boolean command asynchronously using Task, and returns true or false.
+        /// Execute IDbEc SQL boolean command asynchronously using Task, and returns true or false.
         /// </summary>
         /// <returns> True if the command result is true, otherwise returns false.</returns>
         public Task<bool> ExecuteAsync()
@@ -288,30 +290,30 @@ namespace Dapper.TQuery
     /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions.
     /// <br/>Like create/drop all tables, get all table defenitions and compare with the code tables, and more.
     /// </summary>
-    public class TQueryDatabase
+    public class IDbEcDatabase
     {
         internal SqlConnection SqlConnection { get; set; }
         internal string SqlString { get; set; }
         internal SqlDialect SqlDialect { get; set; }
-        internal TQueryDatabase(string ConnectionString, SqlDialect sqlDialect)
+        internal IDbEcDatabase(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             this.SqlDialect = sqlDialect;
         }
-        internal TQueryDatabase(SqlConnection SqlConnection, SqlDialect sqlDialect)
+        internal IDbEcDatabase(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
             this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
         }
         /// <summary>
-        /// Execute TQuery SQL command.
+        /// Execute IDbEc SQL command.
         /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute TQuery SQL command asynchronously using Task.
+        /// Execute IDbEc SQL command asynchronously using Task.
         /// </summary>
         public Task<int> ExecuteAsync()
         {
@@ -319,32 +321,32 @@ namespace Dapper.TQuery
         }
     }
     /// <summary>
-    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions, with some advanced options of the TQuery library, to read/modify the generated SQL command, and more.
+    /// An <see cref="TQueryDatabase"/> instanse which will be used to handle with all tables at once on the Database with Dapper.TQuery method extensions, with some advanced options of the IDbEc library, to read/modify the generated SQL command, and more.
     /// </summary>
-    public class TQueryDatabaseExtended
+    public class IDbEcDatabaseExtended
     {
         internal SqlConnection SqlConnection { get; set; }
         internal string SqlString { get; set; }
         internal SqlDialect SqlDialect { get; set; }
-        internal TQueryDatabaseExtended(string ConnectionString, SqlDialect sqlDialect)
+        internal IDbEcDatabaseExtended(string ConnectionString, SqlDialect sqlDialect)
         {
             this.SqlConnection = new SqlConnection(ConnectionString);
             this.SqlDialect = sqlDialect;
         }
-        internal TQueryDatabaseExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
+        internal IDbEcDatabaseExtended(SqlConnection SqlConnection, SqlDialect sqlDialect)
         {
             this.SqlConnection = SqlConnection;
             this.SqlDialect = sqlDialect;
         }
         /// <summary>
-        /// Execute TQuery SQL command.
+        /// Execute IDbEc SQL command.
         /// </summary>
         public void Execute()
         {
             SqlConnection.Execute(SqlString);
         }
         /// <summary>
-        /// Execute TQuery SQL command asynchronously using Task.
+        /// Execute IDbEc SQL command asynchronously using Task.
         /// </summary>
         public Task<int> ExecuteAsync()
         {

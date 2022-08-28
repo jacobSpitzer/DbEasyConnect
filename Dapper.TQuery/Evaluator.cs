@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     internal static class Evaluator
     {

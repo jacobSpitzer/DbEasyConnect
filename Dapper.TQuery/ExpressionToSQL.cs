@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Data.SqlClient;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     internal class ExpressionToSQL : ExpressionVisitor
     {

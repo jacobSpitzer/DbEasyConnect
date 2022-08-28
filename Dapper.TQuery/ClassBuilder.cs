@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     internal class ClassBuilder : DynamicObject
     {

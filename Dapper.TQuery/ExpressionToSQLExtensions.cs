@@ -1,5 +1,4 @@
-﻿using Microsoft.SqlServer.Types;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,9 +9,9 @@ using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using static Dapper.TQuery.TQueryExceptions;
+using static DbEasyConnect.Tools.DbEcExceptions;
 
-namespace Dapper.TQuery
+namespace DbEasyConnect.Tools
 {
     internal static class ExpressionToSQLExtensions
     {
@@ -160,9 +159,6 @@ namespace Dapper.TQuery
             new SqlTypeConversionHolder("DATETIMEOFFSET", null,typeof(DateTimeOffset), SqlTypeCategory.DateTime),
             new SqlTypeConversionHolder("decimal", typeof(SqlDecimal),typeof(Decimal), SqlTypeCategory.Numeric),
             new SqlTypeConversionHolder("float", typeof(SqlDouble),typeof(Double), SqlTypeCategory.Numeric),
-            new SqlTypeConversionHolder("geography", typeof(SqlGeography),null),
-            new SqlTypeConversionHolder("geometry", typeof(SqlGeometry),null),
-            new SqlTypeConversionHolder("hierarchyid", typeof(SqlHierarchyId),null),
             new SqlTypeConversionHolder("image", null,null),
             new SqlTypeConversionHolder("int", typeof(SqlInt32),typeof(Int32), SqlTypeCategory.Numeric),
             new SqlTypeConversionHolder("money", typeof(SqlMoney),typeof(Decimal), SqlTypeCategory.Numeric),
@@ -402,7 +398,7 @@ namespace Dapper.TQuery
         }
         internal static string GetTableName(this Type type)
         {
-            TQueryable query = new TQueryable(type, TQueryDefaults.SqlDialect);
+            DbEc query = new DbEc(type, DbEcDefaults.SqlDialect);
             return query.TableName;
         }
     }
